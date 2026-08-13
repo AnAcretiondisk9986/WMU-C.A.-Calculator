@@ -179,7 +179,17 @@ body {
 }
 
 /* ---------- 课程表 ---------- */
-.course-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+.course-table-wrap {
+  max-height: 280px; overflow-y: auto; border: 1px solid var(--line); border-radius: 10px;
+  margin-bottom: 10px; scrollbar-width: thin; scrollbar-color: #c6ccd6 transparent;
+}
+.course-table-wrap::-webkit-scrollbar { width: 8px; }
+.course-table-wrap::-webkit-scrollbar-thumb { background: #c6ccd6; border-radius: 4px; }
+.course-table-wrap::-webkit-scrollbar-track { background: transparent; }
+.course-table { width: 100%; border-collapse: collapse; }
+.course-table thead th {
+  position: sticky; top: 0; z-index: 1; background: #fff;
+}
 .course-table th, .course-table td {
   border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: middle;
 }

@@ -567,6 +567,8 @@
       save();
       renderC2();
       renderYearOverview();
+      const wrap = $(".course-table-wrap");
+      if (wrap) wrap.scrollTop = wrap.scrollHeight; // 滚动到底部显示新行
       const last = $("#course-body tr:last-child input");
       if (last) last.focus();
     });
