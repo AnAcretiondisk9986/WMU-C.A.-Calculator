@@ -34,9 +34,19 @@
 
   function ensureDefaultYear() {
     if (!state.years.length) {
-      state.years.push({ id: "y-" + Date.now(), name: "2024-2025 学年", courses: [], c1: { adds: [], subs: [] }, c3: { items: [] } });
+      state.years.push(newYear("2024-2025 学年"));
       currentYearId = state.years[state.years.length - 1].id;
     }
+  }
+
+  function newYear(name) {
+    return {
+      id: "y-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+      name,
+      courses: [],
+      c1: { adds: [], subs: [] },
+      c3: { items: [], peScore: "", peHealthClass: false }
+    };
   }
 
   /* ---------------- 各区块渲染 ---------------- */
@@ -163,6 +173,46 @@
     renderC2Stat();
   }
 
+  /* 体测降档判定徽章 HTML（依据《奖学金实施办法》：未达良好<80 按降一等级评定；保健班不予降档） */
+  function peBadgeHtml(year) {
+    const score = year.c3.peScore;
+    const hc = !!year.c3.peHealthClass;
+    const hasScore = score !== undefined && score !== null && score !== "";
+    if (!hasScore) return '<span class="pe-badge none">未填写，无判定</span>';
+    const s = Number(score);
+    if (!isFinite(s)) return '<span class="pe-badge none">成绩无效</span>';
+    if (hc) {
+      return '<span class="pe-badge ok">不予降档</span><span class="pe-reason">保健班</span>';
+    }
+    if (s >= 80) {
+      const level = s >= 90 ? "优秀" : "良好";
+      return `<span class="pe-badge ok">不予降档</span><span class="pe-reason">${level}（≥80）</span>`;
+    }
+    return '<span class="pe-badge down">予以降档</span><span class="pe-reason">未达良好（&lt;80 分）</span>';
+  }
+
+  function renderPeCard(year) {
+    const score = year.c3.peScore;
+    const hc = !!year.c3.peHealthClass;
+    return `
+      <div class="pe-card">
+        <div class="pe-head">体质测试 <span class="tag">奖学金降档判定</span></div>
+        <div class="pe-row">
+          <label class="pe-score-label">体测总分
+            <input type="number" data-pe-score min="0" max="100" step="1" placeholder="0-100" value="${esc(score)}">
+          </label>
+          <label class="pe-check"><input type="checkbox" data-pe-health ${hc ? "checked" : ""}> 保健班</label>
+        </div>
+        <div class="pe-result" data-pe-result>${peBadgeHtml(year)}</div>
+        <p class="hint">依据《奖学金实施办法》：优秀学生奖学金要求体测达良好及以上（≥80 分）；未达良好者按降一等级评定，保健班不予降档。</p>
+      </div>`;
+  }
+
+  function updatePeBadge(year) {
+    const result = $("#c3-cats [data-pe-result]");
+    if (result) result.innerHTML = peBadgeHtml(year);
+  }
+
   function renderC3() {
     const year = getCurrentYear();
     if (!year) return;
@@ -186,6 +236,7 @@
             <span class="cat-total">+${sum}</span>
           </div>
           ${open ? `<div class="c3-cat-body">
+            ${cat.key === "study" ? renderPeCard(year) : ""}
             <div class="items">${listHtml}</div>
             <div class="row-actions">
               <button class="btn small" data-quick="c3_${cat.key}" type="button">＋ 按评分表快捷添加</button>
@@ -362,7 +413,7 @@
   function addYear() {
     ensureDefaultYear();
     const n = state.years.length + 1;
-    const y = { id: "y-" + Date.now(), name: `新学年 ${n}`, courses: [], c1: { adds: [], subs: [] }, c3: { items: [] } };
+    const y = newYear(`新学年 ${n}`);
     state.years.push(y);
     currentYearId = y.id;
     save();
@@ -519,6 +570,24 @@
       if (q) { openQuickModal(q.dataset.quick); return; }
       const cu = e.target.closest("[data-custom]");
       if (cu) { openCustomModal(cu.dataset.custom); return; }
+    });
+
+    // 体测成绩输入与保健班复选框
+    $("#c3-cats").addEventListener("input", (e) => {
+      if (e.target.dataset.peScore === undefined) return;
+      const year = getCurrentYear();
+      if (!year) return;
+      year.c3.peScore = e.target.value === "" ? "" : Number(e.target.value);
+      save();
+      updatePeBadge(year);
+    });
+    $("#c3-cats").addEventListener("change", (e) => {
+      if (e.target.dataset.peHealth === undefined) return;
+      const year = getCurrentYear();
+      if (!year) return;
+      year.c3.peHealthClass = e.target.checked;
+      save();
+      updatePeBadge(year);
     });
 
     // 快选面板
