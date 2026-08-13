@@ -150,6 +150,37 @@ body {
 .import-result { margin-top: 8px; font-size: 12.5px; color: var(--danger); white-space: pre-wrap; }
 .import-result.error { color: var(--danger); }
 
+/* OCR 导入 */
+.ocr-drop {
+  border: 2px dashed var(--line); border-radius: 12px; padding: 28px 16px; text-align: center;
+  color: var(--text-soft); cursor: pointer; transition: .15s; background: #fafbfe;
+}
+.ocr-drop:hover, .ocr-drop.dragover { border-color: var(--primary); color: var(--primary); background: #eef4ff; }
+.ocr-drop p { margin: 4px 0; font-size: 14px; }
+.ocr-drop .ocr-drop-sub { font-size: 12px; opacity: .7; }
+.ocr-progress {
+  margin-top: 10px; padding: 8px 12px; border-radius: 8px; background: #eef4ff;
+  color: var(--primary-dark); font-size: 13px;
+}
+.ocr-progress .bar {
+  height: 6px; border-radius: 3px; background: #c9dcfb; margin-top: 6px; overflow: hidden;
+}
+.ocr-progress .bar i { display: block; height: 100%; background: var(--primary); width: 0; transition: width .2s; }
+.ocr-preview-title { margin: 12px 0 6px; font-size: 14px; }
+.ocr-warnings {
+  background: #fff7e8; border: 1px solid #f5d9a8; color: var(--warn);
+  border-radius: 8px; padding: 8px 12px; font-size: 12.5px; margin-bottom: 8px; white-space: pre-wrap;
+}
+.ocr-preview-table { border: 1px solid var(--line); border-radius: 8px; overflow: auto; max-height: 320px; }
+.ocr-preview-table table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.ocr-preview-table th, .ocr-preview-table td { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; }
+.ocr-preview-table th { background: #f5f7fb; color: var(--text-soft); position: sticky; top: 0; }
+.ocr-preview-table input {
+  width: 100%; min-width: 90px; border: 1px solid transparent; border-radius: 6px; padding: 3px 6px; font-size: 12.5px;
+}
+.ocr-preview-table input:hover { border-color: var(--line); }
+.ocr-preview-table input:focus { outline: none; border-color: var(--primary); background: #fff; }
+
 /* ---------- 课程表 ---------- */
 .course-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
 .course-table th, .course-table td {

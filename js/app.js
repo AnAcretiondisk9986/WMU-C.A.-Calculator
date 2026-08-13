@@ -583,7 +583,118 @@
       renderC2Stat();
     });
 
-    // 教务系统粘贴导入
+    // 教务系统 OCR 截图导入
+    const ocrModal = $("#ocr-modal");
+    let ocrCourses = [];
+    const OCR_STATUS_TEXT = {
+      "loading tesseract core": "加载识别核心…",
+      "initializing tesseract": "初始化…",
+      "loading language traineddata": "下载中文语言包…",
+      "initializing api": "准备识别引擎…",
+      "recognizing text": "识别中"
+    };
+    function setOcrProgress(status, pct) {
+      const box = $("#ocr-progress");
+      box.hidden = false;
+      box.style.color = "";
+      const label = OCR_STATUS_TEXT[status] || status || "处理中";
+      const p = pct != null ? Math.round(pct * 100) : null;
+      box.innerHTML = `<div>${esc(label)}${p != null ? " " + p + "%" : ""}</div>
+        <div class="bar"><i style="width:${p != null ? p : 6}%"></i></div>`;
+    }
+    function openOcrModal() {
+      ocrCourses = [];
+      $("#ocr-progress").hidden = true;
+      $("#ocr-preview").hidden = true;
+      $("#ocr-import").disabled = true;
+      $("#ocr-file").value = "";
+      ocrModal.hidden = false;
+    }
+    function closeOcrModal() { ocrModal.hidden = true; }
+    async function runOcr(file) {
+      setOcrProgress("准备…", null);
+      try {
+        await ZCOcr.loadEngine((m) => setOcrProgress(m.status, m.progress));
+        setOcrProgress("recognizing text", 0);
+        const data = await ZCOcr.recognize(file);
+        const lines = ZCOcr.linesFromBlocks(data.blocks);
+        const { courses, warnings } = ZCOcr.buildTable(lines);
+        ocrCourses = courses;
+        $("#ocr-preview").hidden = false;
+        $("#ocr-warnings").textContent = warnings.length ? "⚠ " + warnings.join("\n") : "";
+        const typeOpts = ['<option value="">未标记</option>', '<option value="required">必修</option>', '<option value="limited">限选</option>', '<option value="optional">任选</option>'];
+        $("#ocr-preview-body").innerHTML = `
+          <table>
+            <thead><tr><th>#</th><th>课程名称</th><th>学分</th><th>成绩</th><th>性质</th></tr></thead>
+            <tbody>${courses.map((c, i) => `
+              <tr>
+                <td>${i + 1}</td>
+                <td><input data-idx="${i}" data-k="name" value="${esc(c.name)}"></td>
+                <td style="width:70px"><input data-idx="${i}" data-k="credit" type="number" min="0" step="0.5" value="${esc(c.credit)}"></td>
+                <td style="width:80px"><input data-idx="${i}" data-k="score" value="${esc(c.score)}"></td>
+                <td style="width:90px"><select data-idx="${i}" data-k="type">${typeOpts.map((o) => o.includes('value="' + (c.type || "") + '"') ? o.replace("<option", "<option selected") : o).join("")}</select></td>
+              </tr>`).join("")}
+            </tbody>
+          </table>`;
+        $("#ocr-import").disabled = false;
+        $("#ocr-progress").hidden = true;
+      } catch (err) {
+        const box = $("#ocr-progress");
+        box.hidden = false;
+        box.style.color = "var(--danger)";
+        box.textContent = "OCR 失败：" + (err && err.message ? err.message : String(err));
+      }
+    }
+    function importOcrCourses() {
+      const year = getCurrentYear();
+      if (!year || !ocrCourses.length) return;
+      let added = 0, skipped = 0;
+      for (const c of ocrCourses) {
+        const name = String(c.name || "").trim();
+        if (!name) continue;
+        const dup = year.courses.some((x) => x.name === name && String(x.credit) === String(c.credit));
+        if (dup) { skipped++; continue; }
+        year.courses.push({ name, credit: c.credit, score: c.score, scale: typeof c.score === "number" ? "percent" : "five", type: c.type });
+        added++;
+      }
+      save();
+      closeOcrModal();
+      renderC2();
+      renderYearOverview();
+      alert(`已导入 ${added} 门课程${skipped ? `，跳过重复 ${skipped} 门` : ""}`);
+    }
+    $("#btn-ocr-jw").addEventListener("click", openOcrModal);
+    $("#ocr-modal-close").addEventListener("click", closeOcrModal);
+    $("#ocr-modal-cancel").addEventListener("click", closeOcrModal);
+    $("#ocr-modal").addEventListener("click", (e) => { if (e.target === e.currentTarget) closeOcrModal(); });
+    $("#ocr-drop").addEventListener("click", () => $("#ocr-file").click());
+    $("#ocr-drop").addEventListener("dragover", (e) => { e.preventDefault(); e.currentTarget.classList.add("dragover"); });
+    $("#ocr-drop").addEventListener("dragleave", (e) => e.currentTarget.classList.remove("dragover"));
+    $("#ocr-drop").addEventListener("drop", (e) => {
+      e.preventDefault();
+      e.currentTarget.classList.remove("dragover");
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f && f.type.startsWith("image/")) runOcr(f);
+      else alert("请拖入图片文件（png/jpg/webp）");
+    });
+    $("#ocr-file").addEventListener("change", (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (f) runOcr(f);
+    });
+    $("#ocr-preview-body").addEventListener("input", (e) => {
+      const el = e.target;
+      const c = ocrCourses[Number(el.dataset.idx)];
+      if (!c) return;
+      const k = el.dataset.k;
+      if (k === "type") c.type = el.value;
+      else if (k === "credit") c.credit = el.value;
+      else c[k] = el.value;
+      if (k === "score") {
+        const digits = String(el.value).replace(/[^\d.]/g, "");
+        c.scale = digits !== "" ? "percent" : "five";
+      }
+    });
+    $("#ocr-import").addEventListener("click", importOcrCourses);
     const importModal = $("#import-modal");
     function openImportModal() {
       $("#import-text").value = "";
@@ -766,6 +877,7 @@
       if (e.key === "Escape") {
         if (!$("#quick-modal").hidden) closeQuickModal();
         if (!$("#custom-modal").hidden) closeCustomModal();
+        if (!$("#ocr-modal").hidden) closeOcrModal();
       }
     });
   }

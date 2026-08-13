@@ -94,7 +94,8 @@
           </table>
           <div class="row-actions">
             <button class="btn small" id="btn-add-course" type="button">＋ 添加课程</button>
-            <button class="btn small ghost" id="btn-import-jw" type="button">📋 从教务系统粘贴导入</button>
+            <button class="btn small" id="btn-ocr-jw" type="button">📷 截图 OCR 导入</button>
+            <button class="btn small ghost" id="btn-import-jw" type="button">📋 粘贴文本导入（备用）</button>
             <label class="c2-onlyreq" title="与教务系统导出/测评口径一致：排除任意选修课">
               <input type="checkbox" id="c2-only-required"> 仅统计必修+限选
             </label>
@@ -216,6 +217,37 @@
     <option value="不及格"></option>
   </datalist>
 
+  <!-- ============ 教务系统 OCR 导入模态框 ============ -->
+  <div class="modal-mask" id="ocr-modal" hidden>
+    <div class="modal">
+      <div class="modal-head">
+        <h3>从教务系统截图导入（OCR）</h3>
+        <button class="modal-close" id="ocr-modal-close" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">
+          在教务系统"学生成绩查询"页截图（整页或成绩表格区域），上传后自动识别课程名称、学分、成绩、课程性质。
+          首次使用需下载中文识别包（约 10-15MB，此后浏览器自动缓存）。识别结果可在预览中修改后再导入。
+        </p>
+        <div class="ocr-drop" id="ocr-drop">
+          <input type="file" id="ocr-file" accept="image/*" hidden>
+          <p>📷 点击选择截图，或将图片拖拽到此处</p>
+          <p class="ocr-drop-sub">支持 png / jpg / webp</p>
+        </div>
+        <div class="ocr-progress" id="ocr-progress" hidden></div>
+        <div id="ocr-preview" hidden>
+          <h4 class="ocr-preview-title">识别结果预览（可直接修改后导入）</h4>
+          <div id="ocr-warnings" class="ocr-warnings"></div>
+          <div class="ocr-preview-table" id="ocr-preview-body"></div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn ghost" id="ocr-modal-cancel" type="button">关闭</button>
+        <button class="btn" id="ocr-import" type="button" disabled>导入课程</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ============ 教务系统导入模态框 ============ -->
   <div class="modal-mask" id="import-modal" hidden>
     <div class="modal">
@@ -242,9 +274,11 @@
     <p>仅供学生自评参考，测评结果以班级测评小组、系及学院认定为准。</p>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="js/data.js"></script>
   <script src="js/calc.js"></script>
   <script src="js/storage.js"></script>
+  <script src="js/ocr.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
