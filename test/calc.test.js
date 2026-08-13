@@ -181,6 +181,34 @@ t("calcYear 支持 c2OnlyRequired", () => {
   assert.strictEqual(r.c2.excludedCount, 1);
   assert.strictEqual(r.total, 85);
 });
+t("真实教务列序：成绩列定位（避开成绩性质/作废列）+ 空列不错位", () => {
+  // 24 列与教务系统“学生成绩查询”可见列一致；“成绩”列在第 22 位，其前有“成绩性质”“是否成绩作废”
+  const rows = [
+    "查看\t学年\t学期\t课程代码\t课程名称\t课程性质\t学分\t成绩备注\t绩点\t成绩性质\t是否学位课程\t开课学院\t课程标记\t课程类别\t课程归属\t教学班\t任课教师\t考核方式\t学号\t姓名\t学生标记\t成绩\t是否成绩作废\t学分绩点",
+    "查看\t2025-2026\t1\tNN070001\t军事技能\t必修课\t2.0\t\t3.00\t正常考试\t否\t学生处\t主修\t公共基础必修课\t\t教学班A\t仁济学院学工办\t考试\t2519120004\t黄映焜\t可选日语学生\t合格\t否\t6.00",
+    "查看\t2025-2026\t1\tNN101146\t高等数学（1）\t必修课\t4.0\t\t3.50\t正常考试\t否\t第一临床医学院\t主修\t专业基础必修课\t\t教学班B\t冯伟训\t考试\t2519120004\t黄映焜\t可选日语学生\t80\t否\t14.00",
+    "查看\t2025-2026\t1\tXX000001\t大学英语\t必修课\t2.0\t\t2.00\t补考\t否\t外语学院\t主修\t公共基础必修课\t\t教学班C\t王老师\t考试\t2519120004\t黄映焜\t可选日语学生\t62\t否\t4.00",
+    "查看\t2025-2026\t1\tYY000002\t旧课程\t任意选修课\t2.0\t\t0.00\t正常考试\t否\t某学院\t主修\t任意选修课\t\t教学班D\t张老师\t考试\t2519120004\t黄映焜\t可选日语学生\t30\t是\t0.00"
+  ].join("\n");
+  const { courses, warnings } = C.parseJwText(rows);
+  assert.strictEqual(courses.length, 3); // 作废课程被跳过
+  assert.strictEqual(courses[0].name, "军事技能");
+  assert.strictEqual(courses[0].score, "合格"); // 等级制保留原文
+  assert.strictEqual(courses[0].scale, "five");
+  assert.strictEqual(courses[0].type, "required");
+  assert.strictEqual(courses[1].score, 80);     // 数字成绩
+  assert.strictEqual(courses[2].score, 62);     // 补考成绩仍取实际值
+  assert.ok(warnings.some(w => w.includes("等级制") && w.includes("合格")), "应有等级制换算提示: " + warnings.join("|"));
+  assert.ok(warnings.some(w => w.includes("成绩已作废")), "应有作废提示");
+  assert.ok(warnings.some(w => w.includes("补考")), "应有补考提示");
+});
+t("五级制别名换算：优秀/良好/中等/合格/不合格", () => {
+  const r = C.calcC2([
+    { credit: 1, score: "优秀" }, { credit: 1, score: "良好" },
+    { credit: 1, score: "中等" }, { credit: 1, score: "合格" }, { credit: 1, score: "不合格" }
+  ]);
+  assert.strictEqual(r.score, (90 + 80 + 70 + 60 + 50) / 5);
+});
 
 console.log("— 双方案 —");
 t("本部 C3 基准 65、仁济 C3 基准 70", () => {

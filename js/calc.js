@@ -131,11 +131,12 @@ const JW_TYPE_MAP = {
 };
 
 function splitJwLine(line) {
-  let parts = line.split(/\t+/).map(s => s.trim()).filter(s => s.length > 0);
-  if (parts.length < 2) {
-    parts = line.split(/[ \u3000]{2,}/).map(s => s.trim()).filter(s => s.length > 0);
+  if (line.includes("\t")) {
+    // 保留空列：教务表格空单元格产生连续制表符，合并会错位
+    return line.split("\t").map(s => s.trim());
   }
-  return parts;
+  const parts = line.split(/[ \u3000]{2,}/).map(s => s.trim()).filter(s => s.length > 0);
+  return parts.length > 1 ? parts : [line.trim()];
 }
 
 function parseJwText(text) {
@@ -152,9 +153,13 @@ function parseJwText(text) {
   if (headerIdx < 0) throw new Error("未识别到成绩表头（需包含“课程名称”“学分”列）");
   const iName = Math.max(header.findIndex(c => c.includes("课程名称")), header.findIndex(c => c === "课程"));
   const iCredit = header.findIndex(c => c.includes("学分"));
-  const iScore = header.findIndex(c => c.includes("成绩"));
+  // 成绩列需精确匹配：表格中"成绩性质/成绩备注/是否成绩作废"等列也含"成绩"字样且排在"成绩"列之前
+  const iScore = header.findIndex(c =>
+    c === "成绩" || (c.includes("成绩") && !c.includes("性质") && !c.includes("备注") && !c.includes("作废")));
   const iType = Math.max(header.findIndex(c => c.includes("课程性质")), header.findIndex(c => c.includes("性质") && !c.includes("成绩")));
   const iRemark = header.findIndex(c => c.includes("备注"));
+  const iKsz = header.findIndex(c => c.includes("成绩性质"));      // 正常考试/补考/重修等
+  const iInvalid = header.findIndex(c => c.includes("作废"));      // 是否成绩作废
   if (iName < 0 || iCredit < 0) throw new Error("表头缺少“课程名称”或“学分”列");
   if (iScore < 0) {
     if (header.some(c => c.includes("绩点"))) {
@@ -168,21 +173,34 @@ function parseJwText(text) {
     if (cols.length < 3) continue;
     const name = (cols[iName] || "").trim();
     if (!name) continue;
+    // 成绩作废的课程不计入
+    if (iInvalid >= 0 && /^是$/.test((cols[iInvalid] || "").trim())) {
+      warnings.push(`「${name}」成绩已作废，已跳过`);
+      continue;
+    }
     const credit = Number((cols[iCredit] || "").replace(/[^\d.]/g, ""));
     const type = iType >= 0 ? (JW_TYPE_MAP[(cols[iType] || "").trim()] || "") : "";
+    const ksz = iKsz >= 0 ? (cols[iKsz] || "").trim() : "";
     let score = "";
     const scoreRaw = (cols[iScore] || "").trim();
     const digits = scoreRaw.replace(/[^\d.]/g, "");
     const n = digits !== "" ? Number(digits) : NaN;
     if (isFinite(n) && n >= 0) score = n;
-    else if (FIVE_GRADE && FIVE_GRADE.hasOwnProperty(scoreRaw)) score = scoreRaw;
+    else if (FIVE_GRADE && FIVE_GRADE.hasOwnProperty(scoreRaw)) {
+      score = scoreRaw;
+      warnings.push(`「${name}」为等级制成绩（${scoreRaw}），按 ${FIVE_GRADE[scoreRaw]} 分换算，请核实`);
+    }
     else if (iRemark >= 0) {
       const rDigits = (cols[iRemark] || "").replace(/[^\d.]/g, "");
       const rn = rDigits !== "" ? Number(rDigits) : NaN;
       if (isFinite(rn) && rn >= 0) score = rn;
     }
     if (score === "") {
-      warnings.push(`「${name}」未解析到有效成绩，请手动填写`);
+      warnings.push(/^[A-Da-d]$/.test(scoreRaw)
+        ? `「${name}」成绩为字母等级（${scoreRaw}），无法自动换算，请手动填写分数`
+        : `「${name}」未解析到有效成绩，请手动填写`);
+    } else if (/补考|重修/.test(ksz) && ksz !== "正常考试") {
+      warnings.push(`「${name}」成绩性质为“${ksz}”，请按规则确认计分（补考合格按60分、重修按最高成绩）`);
     }
     courses.push({
       name,
