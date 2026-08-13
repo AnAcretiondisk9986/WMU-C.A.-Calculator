@@ -138,15 +138,27 @@
     if (!year) return;
     const body = $("#course-body");
     if (!year.courses.length) {
-      body.innerHTML = '<tr><td colspan="4"><div class="empty-hint">暂无课程，点击下方按钮添加（成绩可输入百分制数字或 优/良/中/及格/不及格）</div></td></tr>';
+      body.innerHTML = '<tr><td colspan="5"><div class="empty-hint">暂无课程，点击下方按钮添加（分数制选"五级制"时成绩填 优/良/中/及格/不及格）</div></td></tr>';
     } else {
-      body.innerHTML = year.courses.map((c, i) => `
+      body.innerHTML = year.courses.map((c, i) => {
+        const scale = c.scale === "five" ? "five" : "percent";
+        const scoreAttrs = scale === "five"
+          ? 'list="grade-list" placeholder="优/良/中/及格/不及格"'
+          : 'placeholder="0-100"';
+        return `
         <tr data-idx="${i}">
           <td><input data-field="name" value="${esc(c.name)}" placeholder="课程名称" maxlength="40"></td>
+          <td class="scale-cell">
+            <select data-field="scale" class="scale-select" title="选择该课程的成绩计分方式">
+              <option value="percent"${scale === "percent" ? " selected" : ""}>百分制</option>
+              <option value="five"${scale === "five" ? " selected" : ""}>五级制</option>
+            </select>
+          </td>
           <td class="num"><input data-field="credit" type="number" min="0" step="0.5" value="${c.credit ?? ""}" placeholder="学分"></td>
-          <td class="num"><input data-field="score" value="${esc(c.score)}" list="grade-list" placeholder="成绩" maxlength="10"></td>
+          <td class="num"><input data-field="score" value="${esc(c.score)}" ${scoreAttrs} maxlength="10"></td>
           <td class="op"><button class="del" data-action="del-course" data-idx="${i}" title="删除">✕</button></td>
-        </tr>`).join("");
+        </tr>`;
+      }).join("");
     }
     renderC2Stat();
   }
@@ -418,7 +430,7 @@
     $("#btn-add-course").addEventListener("click", () => {
       const year = getCurrentYear();
       if (!year) return;
-      year.courses.push({ name: "", credit: "", score: "" });
+      year.courses.push({ name: "", credit: "", score: "", scale: "percent" });
       save();
       renderC2();
       renderYearOverview();
@@ -445,6 +457,34 @@
       save();
       renderC2();
       renderYearOverview();
+    });
+
+    // 分数制切换：联动成绩输入格式；清空与制式不匹配的成绩
+    const FIVE_WORDS = ["优", "良", "中", "及格", "不及格"];
+    $("#course-body").addEventListener("change", (e) => {
+      if (e.target.dataset.field !== "scale") return;
+      const tr = e.target.closest("tr");
+      const year = getCurrentYear();
+      const idx = Number(tr.dataset.idx);
+      if (!year || !year.courses[idx]) return;
+      const course = year.courses[idx];
+      const scale = e.target.value;
+      const scoreInput = tr.querySelector('[data-field="score"]');
+      const old = course.score;
+      const isFiveWord = typeof old === "string" && FIVE_WORDS.includes(old.trim());
+      if (scale === "five") {
+        scoreInput.setAttribute("list", "grade-list");
+        scoreInput.placeholder = "优/良/中/及格/不及格";
+        if (old !== "" && old != null && !isFiveWord) { course.score = ""; scoreInput.value = ""; }
+      } else {
+        scoreInput.removeAttribute("list");
+        scoreInput.placeholder = "0-100";
+        if (isFiveWord) { course.score = ""; scoreInput.value = ""; }
+      }
+      course.scale = scale;
+      save();
+      renderYearOverview();
+      renderC2Stat();
     });
 
     // 通用：删除条目（事件委托）
