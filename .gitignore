@@ -1,0 +1,5 @@
+# Reasonix 本地附件/会话数据，不入库
+.reasonix/
+
+# Node 测试临时产物
+node_modules/

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>温州医科大学仁济学院 · 素质综合测评计算器</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand">
+        <h1>素质综合测评计算器</h1>
+        <p class="sub">依据《温州医科大学仁济学院学生素质综合测评办法》 · 数据仅保存在本地浏览器</p>
+      </div>
+      <div class="profile">
+        <input type="text" id="profile-name" placeholder="姓名" maxlength="20" title="姓名">
+        <input type="text" id="profile-class" placeholder="班级" maxlength="30" title="班级">
+        <input type="text" id="profile-id" placeholder="学号" maxlength="20" title="学号">
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs wrap">
+    <button class="tab-btn active" data-tab="assess">个人测评</button>
+    <button class="tab-btn" data-tab="rank">班级排名</button>
+    <button class="tab-btn" data-tab="manage">数据管理</button>
+  </nav>
+
+  <main class="wrap">
+    <!-- ============ Tab 1 个人测评 ============ -->
+    <section id="tab-assess" class="tab-pane active">
+      <div class="year-bar card">
+        <label for="year-select">当前学年</label>
+        <select id="year-select"></select>
+        <button class="btn" id="btn-add-year" type="button">＋ 新增学年</button>
+        <button class="btn ghost" id="btn-rename-year" type="button">重命名</button>
+        <button class="btn danger ghost" id="btn-del-year" type="button">删除本学年</button>
+      </div>
+
+      <!-- 学年结果概览 -->
+      <div class="result-grid" id="year-overview"></div>
+
+      <div class="cols">
+        <!-- C1 -->
+        <div class="card section" id="section-c1">
+          <h2>思想品德表现 <span class="tag">C1 · 权重 10%</span></h2>
+          <p class="hint">基准分 80，加减分累计，最高不超过 100 分；低于 60 分不合格。</p>
+          <div class="sub-block">
+            <div class="sub-head">
+              <h3>加分项目</h3>
+              <span class="mini-total" id="c1-add-total">+0</span>
+            </div>
+            <div class="items" id="c1-add-list"></div>
+            <div class="row-actions">
+              <button class="btn small" data-quick="c1_add" type="button">＋ 按评分表快捷添加</button>
+              <button class="btn small ghost" data-custom="c1_add" type="button">自定义加分</button>
+            </div>
+          </div>
+          <div class="sub-block">
+            <div class="sub-head">
+              <h3>减分项目</h3>
+              <span class="mini-total minus" id="c1-sub-total">−0</span>
+            </div>
+            <div class="items" id="c1-sub-list"></div>
+            <div class="row-actions">
+              <button class="btn small" data-quick="c1_sub" type="button">＋ 按评分表快捷添加</button>
+              <button class="btn small ghost" data-custom="c1_sub" type="button">自定义减分</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- C2 -->
+        <div class="card section" id="section-c2">
+          <h2>课程学习成绩 <span class="tag">C2 · 权重 70%</span></h2>
+          <p class="hint">C2 = Σ(考分×学分) / Σ学分；五级分制换算：优=90 良=80 中=70 及格=60 不及格=50；补考合格按 60 分计入。</p>
+          <table class="course-table">
+            <thead>
+              <tr>
+                <th>课程名称</th>
+                <th class="num">学分</th>
+                <th class="num">成绩</th>
+                <th class="op"></th>
+              </tr>
+            </thead>
+            <tbody id="course-body"></tbody>
+          </table>
+          <button class="btn small" id="btn-add-course" type="button">＋ 添加课程</button>
+          <div class="c2-stat" id="c2-stat"></div>
+        </div>
+
+        <!-- C3 -->
+        <div class="card section" id="section-c3">
+          <h2>发展素质 <span class="tag">C3 · 权重 20%</span></h2>
+          <p class="hint">基准分 70，只加分，最高不超过 100 分。分学习能力、社会活动与社会工作、创新创业成果、文体素质四类。</p>
+          <div id="c3-cats"></div>
+        </div>
+      </div>
+
+      <div class="card overall-card">
+        <h2>在校综合成绩 <span class="tag">各学年平均值</span></h2>
+        <div id="overall-result"></div>
+      </div>
+    </section>
+
+    <!-- ============ Tab 2 班级排名 ============ -->
+    <section id="tab-rank" class="tab-pane">
+      <div class="card">
+        <h2>班级测评排名（简易版）</h2>
+        <p class="hint">
+          录入本班同学姓名与综合测评总分（或从"个人测评"当前学年总分一键带入本人成绩），自动按总分降序排出名次，相同分数并列。
+          计算总分的方法：C = C1×10% + C2×70% + C3×20%，见"个人测评"页。
+        </p>
+        <div class="rank-form">
+          <input type="text" id="rank-name" placeholder="姓名" maxlength="20">
+          <input type="number" id="rank-total" placeholder="综合总分（如 85.6）" min="0" max="100" step="0.1">
+          <button class="btn" id="btn-rank-add" type="button">添加</button>
+          <button class="btn ghost" id="btn-rank-me" type="button">带入我的当前学年成绩</button>
+          <button class="btn danger ghost" id="btn-rank-clear" type="button">清空</button>
+        </div>
+        <table class="rank-table">
+          <thead>
+            <tr><th class="num">名次</th><th>姓名</th><th class="num">总分</th><th class="op"></th></tr>
+          </thead>
+          <tbody id="rank-body"></tbody>
+        </table>
+        <p class="hint" id="rank-empty">暂无成员，请先添加。</p>
+      </div>
+    </section>
+
+    <!-- ============ Tab 3 数据管理 ============ -->
+    <section id="tab-manage" class="tab-pane">
+      <div class="card">
+        <h2>数据管理</h2>
+        <p class="hint">
+          所有数据保存在本浏览器 localStorage 中，不会上传到任何服务器。建议定期导出备份，或用于在另一台设备上继续使用。
+        </p>
+        <div class="manage-actions">
+          <button class="btn" id="btn-export" type="button">导出 JSON 备份</button>
+          <label class="btn ghost file-label">
+            导入 JSON 恢复
+            <input type="file" id="import-file" accept=".json,application/json" hidden>
+          </label>
+          <button class="btn danger" id="btn-wipe" type="button">清空全部数据</button>
+        </div>
+        <p class="hint" id="manage-msg"></p>
+        <h3>计算公式速览</h3>
+        <ul class="formula-list">
+          <li>C1 思想品德表现 = min(100, 80 + 加分 − 减分)，合格线 60。</li>
+          <li>C2 课程学习成绩 = Σ(考分 × 学分) / Σ学分（学分加权平均分）。</li>
+          <li>C3 发展素质 = min(100, 70 + 各类加分)。</li>
+          <li>学年综合测评成绩 C = C1×10% + C2×70% + C3×20%。</li>
+          <li>在校综合测评成绩 = 各学年综合测评成绩的平均值。</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ 快捷添加模态框 ============ -->
+  <div class="modal-mask" id="quick-modal" hidden>
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="quick-modal-title">按评分表快捷添加</h3>
+        <button class="modal-close" id="quick-modal-close" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body" id="quick-modal-body"></div>
+      <div class="modal-foot">
+        <button class="btn ghost" id="quick-modal-cancel" type="button">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 自定义条目模态框 ============ -->
+  <div class="modal-mask" id="custom-modal" hidden>
+    <div class="modal small">
+      <div class="modal-head">
+        <h3 id="custom-modal-title">自定义条目</h3>
+        <button class="modal-close" id="custom-modal-close" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <label class="field">
+          <span>项目名称</span>
+          <input type="text" id="custom-name" placeholder="如：校级大创项目结题" maxlength="60">
+        </label>
+        <label class="field">
+          <span>分值</span>
+          <input type="number" id="custom-points" placeholder="加分填正数，减分填负数" step="0.5">
+        </label>
+      </div>
+      <div class="modal-foot">
+        <button class="btn ghost" id="custom-modal-cancel" type="button">取消</button>
+        <button class="btn" id="custom-modal-ok" type="button">添加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 五级分制成绩提示 -->
+  <datalist id="grade-list">
+    <option value="优"></option>
+    <option value="良"></option>
+    <option value="中"></option>
+    <option value="及格"></option>
+    <option value="不及格"></option>
+  </datalist>
+
+  <footer class="wrap footer">
+    <p>仅供学生自评参考，测评结果以班级测评小组、系及学院认定为准。</p>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/calc.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
