@@ -335,3 +335,57 @@ body {
   .result-grid { grid-template-columns: repeat(2, 1fr); }
   .topbar-inner { flex-direction: column; align-items: flex-start; }
 }
+
+/* ========== 转专业计算器页面 ========== */
+a.tab-btn { text-decoration: none; display: inline-block; }
+.tabs a.tab-btn { margin-left: auto; }
+
+.top-link {
+  border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.15); color: #fff;
+  border-radius: 8px; padding: 6px 10px; font-size: 13px; text-decoration: none;
+  display: inline-flex; align-items: center; white-space: nowrap;
+}
+.top-link:hover { background: rgba(255,255,255,.25); border-color: #fff; }
+
+.inline-fields { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-start; }
+.inline-fields .field { flex: 1; min-width: 130px; }
+.field.grow { flex: 2 !important; min-width: 220px; }
+.field select {
+  border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font-size: 14px; background: #fff;
+}
+.field select:focus { outline: none; border-color: var(--primary); }
+
+.input-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 18px; }
+.field-group {
+  border: 1px dashed var(--line); border-radius: 10px; padding: 12px 14px; background: #fbfcff;
+}
+.field-group h3 {
+  margin: 0 0 8px; font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.field-group .field { margin-bottom: 0; }
+.field-group .inline-fields .field { margin-bottom: 0; }
+
+#qualify-line { margin-top: 8px; }
+
+.detail-table-wrap { overflow-x: auto; }
+.detail-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+.detail-table th, .detail-table td {
+  border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top;
+}
+.detail-table thead th { background: #f5f7fb; color: var(--text-soft); font-size: 12.5px; font-weight: 500; }
+.detail-table th.num, .detail-table td.num { width: 70px; text-align: center; }
+.detail-table td.strong { font-weight: 700; color: var(--primary); }
+.detail-table td.cell-note { font-size: 12.5px; color: var(--text-soft); }
+.detail-table tr.total-row td { background: #f4f8ff; font-weight: 700; border-top: 2px solid var(--primary); }
+
+.doc-list { margin: 4px 0 10px; padding-left: 20px; }
+.doc-list li { margin-bottom: 4px; font-size: 13px; }
+#doc-body h3 { margin: 12px 0 4px; }
+#doc-body h3:first-child { margin-top: 0; }
+
+.result-notes-list { margin: 8px 0 0; padding-left: 20px; }
+.result-notes-list li.warn { color: var(--warn); font-size: 13px; margin-bottom: 3px; }
+
+@media (max-width: 640px) {
+  .input-grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>转专业考核计算器</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand">
+        <h1>转专业考核计算器</h1>
+        <p class="sub">本部依据《温州医科大学本科学生转专业管理办法》及各学院实施细则 · 仁济依据2025年转专业通知</p>
+      </div>
+      <div class="profile">
+        <select id="scheme-select" title="选择转专业方案（本部按学院细则，仁济为统一方案）">
+          <option value="benbu" selected>温医大本部</option>
+          <option value="renji">仁济学院</option>
+        </select>
+        <a class="top-link" href="index.html" title="返回素质综合测评计算器">← 综测计算器</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- ============ 方案选择 ============ -->
+    <section class="card" id="card-scheme">
+      <h2>方案选择 <span class="tag" id="scheme-tag">温医大本部</span></h2>
+      <div id="college-row">
+        <div class="inline-fields">
+          <label class="field grow">
+            <span>接收学院</span>
+            <select id="college-select"></select>
+          </label>
+          <label class="field grow">
+            <span>拟转入专业</span>
+            <select id="major-select"></select>
+          </label>
+        </div>
+      </div>
+      <p class="hint" id="renji-tip" hidden>
+        仁济学院 2025 年转专业分两轮：第一轮要求学年成绩列原专业全年级前 15%（个别专业前15%不足1人时第一名取得资格），
+        可申请临床医学类（临床医学含全科医学跟读班、麻醉学）和口腔医学专业；第二轮在前 50% 中录取（第一轮结束后重新计算名额）。
+        非医学类专业（英语、日语、公共事业管理、市场营销、信息管理与信息系统、生物医学工程等）原则上不受成绩限制。
+        最多可填报 5 个专业志愿（平行志愿，不设级差）；通识选修课成绩不计入平均学分绩点排名。
+      </p>
+      <p class="hint" id="scheme-doc"></p>
+    </section>
+
+    <!-- ============ 考核信息录入 ============ -->
+    <section class="card" id="card-input">
+      <h2>考核信息录入</h2>
+      <div class="input-grid">
+        <div class="field-group">
+          <h3>① 专业成绩排名</h3>
+          <div class="inline-fields">
+            <label class="field">
+              <span>原专业人数</span>
+              <input type="number" id="in-total" min="1" step="1" placeholder="如 120">
+            </label>
+            <label class="field">
+              <span>专业排名</span>
+              <input type="number" id="in-rank" min="1" step="1" placeholder="如 8">
+            </label>
+          </div>
+          <div id="qualify-line"></div>
+          <p class="hint" id="rank-formula-hint"></p>
+        </div>
+
+        <div class="field-group">
+          <h3>② 面试考核 <span class="tag" id="interview-tag"></span></h3>
+          <label class="field">
+            <span>面试得分</span>
+            <input type="number" id="in-interview" min="0" step="0.5" placeholder="0 ~ 满分">
+          </label>
+          <p class="hint" id="interview-hint"></p>
+        </div>
+
+        <div class="field-group">
+          <h3>③ 大学英语等级成绩 <span class="tag" id="english-tag"></span></h3>
+          <div class="inline-fields">
+            <label class="field">
+              <span>CET-4 分数</span>
+              <input type="number" id="in-c4" min="0" max="710" step="1" placeholder="如 480">
+            </label>
+            <label class="field">
+              <span>CET-6 分数</span>
+              <input type="number" id="in-c6" min="0" max="710" step="1" placeholder="如 520">
+            </label>
+            <label class="field" id="in-ielts-wrap" hidden>
+              <span>IELTS</span>
+              <input type="number" id="in-ielts" min="0" max="9" step="0.5" placeholder="如 6.5">
+            </label>
+            <label class="field" id="in-toefl-wrap" hidden>
+              <span>TOEFL</span>
+              <input type="number" id="in-toefl" min="0" max="120" step="1" placeholder="如 90">
+            </label>
+          </div>
+          <p class="hint" id="english-note"></p>
+        </div>
+
+        <div class="field-group" id="grp-specialty">
+          <h3>④ 专长（论文、学术科研成果等） <span class="tag" id="specialty-tag"></span></h3>
+          <label class="field">
+            <span>专长档次</span>
+            <select id="in-specialty"></select>
+          </label>
+        </div>
+
+        <div class="field-group" id="grp-gaokao" hidden>
+          <h3>⑤ 高考成绩（原高考成绩） <span class="tag" id="gaokao-tag"></span></h3>
+          <div class="inline-fields">
+            <label class="field">
+              <span>本人高考成绩</span>
+              <input type="number" id="in-gaokao" min="0" step="1" placeholder="如 610">
+            </label>
+            <label class="field">
+              <span id="min-admit-label">转入专业最低录取分</span>
+              <input type="number" id="in-minadmit" min="0" step="1" placeholder="如 620">
+            </label>
+          </div>
+          <p class="hint" id="gaokao-hint"></p>
+        </div>
+
+        <div class="field-group" id="grp-cross" hidden>
+          <h3>跨专业情况 <span class="tag">5 分</span></h3>
+          <label class="field">
+            <span>原专业类别</span>
+            <select id="in-frommed">
+              <option value="1">医学类（原专业毕业学位为医学学位）</option>
+              <option value="0">非医学类</option>
+            </select>
+          </label>
+          <p class="hint" id="cross-hint"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 计算结果 ============ -->
+    <section class="card" id="card-result">
+      <h2>考核综合成绩</h2>
+      <div class="result-grid" id="result-grid"></div>
+      <div class="detail-table-wrap">
+        <table class="detail-table" id="detail-table"></table>
+      </div>
+      <div id="result-notes"></div>
+    </section>
+
+    <!-- ============ 计算依据 ============ -->
+    <section class="card" id="card-doc">
+      <h2>计算依据 <span class="tag">政策原文摘要</span></h2>
+      <div id="doc-body"></div>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <p>仅供学生自评参考，最终考核结果以学校/学院公布为准。</p>
+  </footer>
+
+  <script src="js/transfer.js"></script>
+  <script src="js/transfer-app.js"></script>
+</body>
+</html>
