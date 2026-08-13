@@ -120,6 +120,68 @@ t("降序排名 + 并列名次", () => {
   assert.deepStrictEqual(r.map(x => x.rank), [1, 2, 2, 4]);
 });
 
+console.log("— 教务系统导入解析 —");
+const JW_SAMPLE = [
+  "课程代码\t课程名称\t课程性质\t学分\t成绩\t绩点",
+  "NN070001\t军事技能\t必修课\t2.0\t90\t3.00",
+  "NN101146\t高等数学（1）\t必修课\t4.0\t88\t3.50",
+  "NN230433\t课程设计（C语言）\t限制性选修课\t1.0\t92\t4.50",
+  "ra00004B\t口腔医学生职业规划\t任意选修课\t2.0\t85\t3.50"
+].join("\n");
+t("解析教务系统表格：课程数/名称/学分/成绩/性质", () => {
+  const { courses, warnings } = C.parseJwText(JW_SAMPLE);
+  assert.strictEqual(courses.length, 4);
+  assert.strictEqual(warnings.length, 0);
+  assert.strictEqual(courses[0].name, "军事技能");
+  assert.strictEqual(courses[0].credit, 2);
+  assert.strictEqual(courses[0].score, 90);
+  assert.strictEqual(courses[0].type, "required");
+  assert.strictEqual(courses[1].type, "required");
+  assert.strictEqual(courses[2].type, "limited");
+  assert.strictEqual(courses[3].type, "optional");
+  assert.strictEqual(courses[3].scale, "percent");
+});
+t("解析空格分隔文本", () => {
+  const text = "课程名称  学分  成绩\n大学英语  3.0  良\n高等数学  4.0  86";
+  const { courses } = C.parseJwText(text);
+  assert.strictEqual(courses.length, 2);
+  assert.strictEqual(courses[0].score, "良");
+  assert.strictEqual(courses[0].scale, "five");
+});
+t("无成绩列时抛错（提示绩点页）", () => {
+  const text = "课程名称\t学分\t绩点\n大学英语\t3.0\t3.50";
+  assert.throws(() => C.parseJwText(text), /绩点|成绩/);
+});
+t("calcC2 排除任意选修课", () => {
+  const courses = [
+    { name: "a", credit: 2, score: 90, type: "required" },
+    { name: "b", credit: 2, score: 80, type: "optional" },
+    { name: "c", credit: 2, score: 70 }
+  ];
+  const all = C.calcC2(courses);
+  assert.strictEqual(all.score, 80);
+  assert.strictEqual(all.excludedCount, 0);
+  const filtered = C.calcC2(courses, { excludeOptional: true });
+  assert.strictEqual(filtered.score, 80); // (90+70)/2，任选 80 被排除
+  assert.strictEqual(filtered.excludedCount, 1);
+  assert.strictEqual(filtered.creditSum, 4);
+});
+t("calcYear 支持 c2OnlyRequired", () => {
+  const year = {
+    courses: [
+      { name: "a", credit: 2, score: 90, type: "required" },
+      { name: "b", credit: 2, score: 60, type: "optional" }
+    ],
+    c1: { adds: [], subs: [] }, c3: { items: [] },
+    c2OnlyRequired: true
+  };
+  // C2 = 90，C1=80，C3=70（仁济）→ C = 8 + 63 + 14 = 85
+  const r = C.calcYear(year);
+  assert.strictEqual(r.c2.score, 90);
+  assert.strictEqual(r.c2.excludedCount, 1);
+  assert.strictEqual(r.total, 85);
+});
+
 console.log("— 双方案 —");
 t("本部 C3 基准 65、仁济 C3 基准 70", () => {
   applyScheme("benbu");

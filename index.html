@@ -84,6 +84,7 @@
               <tr>
                 <th>课程名称</th>
                 <th>分数制</th>
+                <th>性质</th>
                 <th class="num">学分</th>
                 <th class="num">成绩</th>
                 <th class="op"></th>
@@ -91,7 +92,13 @@
             </thead>
             <tbody id="course-body"></tbody>
           </table>
-          <button class="btn small" id="btn-add-course" type="button">＋ 添加课程</button>
+          <div class="row-actions">
+            <button class="btn small" id="btn-add-course" type="button">＋ 添加课程</button>
+            <button class="btn small ghost" id="btn-import-jw" type="button">📋 从教务系统粘贴导入</button>
+            <label class="c2-onlyreq" title="与教务系统导出/测评口径一致：排除任意选修课">
+              <input type="checkbox" id="c2-only-required"> 仅统计必修+限选
+            </label>
+          </div>
           <div class="c2-stat" id="c2-stat"></div>
         </div>
 
@@ -208,6 +215,28 @@
     <option value="及格"></option>
     <option value="不及格"></option>
   </datalist>
+
+  <!-- ============ 教务系统导入模态框 ============ -->
+  <div class="modal-mask" id="import-modal" hidden>
+    <div class="modal">
+      <div class="modal-head">
+        <h3>从教务系统导入课程</h3>
+        <button class="modal-close" id="import-modal-close" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">
+          在教务系统"学生成绩查询"页选中整个成绩表格（先点页面空白处 Ctrl+A 全选，再 Ctrl+C），粘贴到下方后点击"解析并导入"。
+          自动识别课程名称、学分、成绩、课程性质（必修/限选/任选）；同一课程重复粘贴会自动跳过。
+        </p>
+        <textarea id="import-text" rows="8" placeholder="粘贴教务系统复制的成绩表格…" spellcheck="false"></textarea>
+        <div id="import-result" class="import-result"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn ghost" id="import-modal-cancel" type="button">取消</button>
+        <button class="btn" id="import-modal-ok" type="button">解析并导入</button>
+      </div>
+    </div>
+  </div>
 
   <footer class="wrap footer">
     <p>仅供学生自评参考，测评结果以班级测评小组、系及学院认定为准。</p>

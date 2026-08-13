@@ -130,10 +130,11 @@
     const year = getCurrentYear();
     if (!year) return;
     const stat = $("#c2-stat");
-    const r = ZCCalc.calcC2(year.courses);
+    const r = ZCCalc.calcC2(year.courses, { excludeOptional: !!year.c2OnlyRequired });
     if (year.courses.length) {
       const parts = [`学分加权平均分 <b>${r.creditSum > 0 ? r.score : "—"}</b>`];
       parts.push(`总学分 ${r.creditSum}`);
+      if (r.excludedCount) parts.push(`<span style="color:var(--text-soft)">已排除 ${r.excludedCount} 门任意选修课</span>`);
       if (r.invalidCount) parts.push(`<span style="color:var(--warn)">${r.invalidCount} 行成绩未填写/无效</span>`);
       if (r.failCount) parts.push(`<span style="color:var(--danger)">${r.failCount} 门不及格（${r.failCredits} 学分）</span>`);
       if (r.failCredits >= C2_FAIL_CREDITS) parts.push(`<span style="color:var(--danger)"><b>不及格学分≥20，课程学习成绩不合格</b></span>`);
@@ -148,10 +149,11 @@
     if (!year) return;
     const body = $("#course-body");
     if (!year.courses.length) {
-      body.innerHTML = '<tr><td colspan="5"><div class="empty-hint">暂无课程，点击下方按钮添加（分数制选"五级制"时成绩填 优/良/中/及格/不及格）</div></td></tr>';
+      body.innerHTML = '<tr><td colspan="6"><div class="empty-hint">暂无课程，点击下方按钮添加，或从教务系统复制成绩表一键导入</div></td></tr>';
     } else {
       body.innerHTML = year.courses.map((c, i) => {
         const scale = c.scale === "five" ? "five" : "percent";
+        const type = c.type || "";
         const scoreAttrs = scale === "five"
           ? 'list="grade-list" placeholder="优/良/中/及格/不及格"'
           : 'placeholder="0-100"';
@@ -164,12 +166,22 @@
               <option value="five"${scale === "five" ? " selected" : ""}>五级制</option>
             </select>
           </td>
+          <td class="type-cell">
+            <select data-field="type" class="scale-select" title="课程性质（教务系统导入时自动识别）">
+              <option value=""${type === "" ? " selected" : ""}>未标记</option>
+              <option value="required"${type === "required" ? " selected" : ""}>必修</option>
+              <option value="limited"${type === "limited" ? " selected" : ""}>限选</option>
+              <option value="optional"${type === "optional" ? " selected" : ""}>任选</option>
+            </select>
+          </td>
           <td class="num"><input data-field="credit" type="number" min="0" step="0.5" value="${c.credit ?? ""}" placeholder="学分"></td>
           <td class="num"><input data-field="score" value="${esc(c.score)}" ${scoreAttrs} maxlength="10"></td>
           <td class="op"><button class="del" data-action="del-course" data-idx="${i}" title="删除">✕</button></td>
         </tr>`;
       }).join("");
     }
+    const chk = $("#c2-only-required");
+    if (chk) chk.checked = !!year.c2OnlyRequired;
     renderC2Stat();
   }
 
@@ -528,32 +540,90 @@
       renderYearOverview();
     });
 
-    // 分数制切换：联动成绩输入格式；清空与制式不匹配的成绩
+    // 分数制/课程性质切换
     const FIVE_WORDS = ["优", "良", "中", "及格", "不及格"];
     $("#course-body").addEventListener("change", (e) => {
-      if (e.target.dataset.field !== "scale") return;
+      const field = e.target.dataset.field;
+      if (field !== "scale" && field !== "type") return;
       const tr = e.target.closest("tr");
       const year = getCurrentYear();
       const idx = Number(tr.dataset.idx);
       if (!year || !year.courses[idx]) return;
       const course = year.courses[idx];
-      const scale = e.target.value;
-      const scoreInput = tr.querySelector('[data-field="score"]');
-      const old = course.score;
-      const isFiveWord = typeof old === "string" && FIVE_WORDS.includes(old.trim());
-      if (scale === "five") {
-        scoreInput.setAttribute("list", "grade-list");
-        scoreInput.placeholder = "优/良/中/及格/不及格";
-        if (old !== "" && old != null && !isFiveWord) { course.score = ""; scoreInput.value = ""; }
+      if (field === "type") {
+        course.type = e.target.value;
       } else {
-        scoreInput.removeAttribute("list");
-        scoreInput.placeholder = "0-100";
-        if (isFiveWord) { course.score = ""; scoreInput.value = ""; }
+        const scale = e.target.value;
+        const scoreInput = tr.querySelector('[data-field="score"]');
+        const old = course.score;
+        const isFiveWord = typeof old === "string" && FIVE_WORDS.includes(old.trim());
+        if (scale === "five") {
+          scoreInput.setAttribute("list", "grade-list");
+          scoreInput.placeholder = "优/良/中/及格/不及格";
+          if (old !== "" && old != null && !isFiveWord) { course.score = ""; scoreInput.value = ""; }
+        } else {
+          scoreInput.removeAttribute("list");
+          scoreInput.placeholder = "0-100";
+          if (isFiveWord) { course.score = ""; scoreInput.value = ""; }
+        }
+        course.scale = scale;
       }
-      course.scale = scale;
       save();
       renderYearOverview();
       renderC2Stat();
+    });
+
+    // 仅统计必修+限选开关
+    $("#c2-only-required").addEventListener("change", (e) => {
+      const year = getCurrentYear();
+      if (!year) return;
+      year.c2OnlyRequired = e.target.checked;
+      save();
+      renderYearOverview();
+      renderC2Stat();
+    });
+
+    // 教务系统粘贴导入
+    const importModal = $("#import-modal");
+    function openImportModal() {
+      $("#import-text").value = "";
+      $("#import-result").textContent = "";
+      $("#import-result").classList.remove("error");
+      importModal.hidden = false;
+      setTimeout(() => $("#import-text").focus(), 0);
+    }
+    function closeImportModal() { importModal.hidden = true; }
+    $("#btn-import-jw").addEventListener("click", openImportModal);
+    $("#import-modal-close").addEventListener("click", closeImportModal);
+    $("#import-modal-cancel").addEventListener("click", closeImportModal);
+    $("#import-modal").addEventListener("click", (e) => { if (e.target === e.currentTarget) closeImportModal(); });
+    $("#import-modal-ok").addEventListener("click", () => {
+      const year = getCurrentYear();
+      if (!year) return;
+      const text = $("#import-text").value;
+      const resultBox = $("#import-result");
+      resultBox.classList.remove("error");
+      try {
+        const { courses, warnings } = ZCCalc.parseJwText(text);
+        let added = 0, skipped = 0;
+        for (const c of courses) {
+          const dup = year.courses.some((x) => x.name === c.name && String(x.credit) === String(c.credit));
+          if (dup) { skipped++; continue; }
+          year.courses.push(c);
+          added++;
+        }
+        save();
+        closeImportModal();
+        renderC2();
+        renderYearOverview();
+        const msgs = [`已导入 ${added} 门课程`];
+        if (skipped) msgs.push(`跳过重复 ${skipped} 门`);
+        if (warnings.length) msgs.push(...warnings.slice(0, 5));
+        alert(msgs.join("；"));
+      } catch (err) {
+        resultBox.textContent = "解析失败：" + (err && err.message ? err.message : String(err));
+        resultBox.classList.add("error");
+      }
     });
 
     // 通用：删除条目（事件委托）

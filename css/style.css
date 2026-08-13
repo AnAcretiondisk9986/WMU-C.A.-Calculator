@@ -133,6 +133,22 @@ body {
 }
 .item-row .del:hover { color: var(--danger); background: #fdecec; }
 .row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.c2-onlyreq {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--text-soft);
+  border: 1px solid var(--line); border-radius: 7px; padding: 4px 10px; background: #fafbfe; cursor: pointer;
+  user-select: none;
+}
+.c2-onlyreq input { width: 14px; height: 14px; accent-color: var(--primary); }
+.c2-onlyreq:hover { border-color: var(--primary); color: var(--text); }
+
+/* 教务系统导入 */
+#import-text {
+  width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+  font-size: 12.5px; font-family: Consolas, "Courier New", monospace; resize: vertical; box-sizing: border-box;
+}
+#import-text:focus { outline: none; border-color: var(--primary); }
+.import-result { margin-top: 8px; font-size: 12.5px; color: var(--danger); white-space: pre-wrap; }
+.import-result.error { color: var(--danger); }
 
 /* ---------- 课程表 ---------- */
 .course-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
@@ -143,6 +159,7 @@ body {
 .course-table th.num, .course-table td.num { width: 90px; }
 .course-table th.op, .course-table td.op { width: 40px; text-align: center; }
 .course-table th.scale-cell, .course-table td.scale-cell { width: 92px; }
+.course-table th.type-cell, .course-table td.type-cell { width: 82px; }
 .course-table input, .course-table select {
   width: 100%; border: 1px solid var(--line); border-radius: 7px; padding: 5px 8px; font-size: 13px;
   background: #fff;
