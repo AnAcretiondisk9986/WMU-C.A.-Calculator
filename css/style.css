@@ -104,6 +104,11 @@ body {
 .result-item .extra { font-size: 11.5px; color: var(--text-soft); margin-top: 2px; }
 .result-item.total { border-color: var(--primary); background: linear-gradient(180deg, #f4f8ff, #fff); }
 .result-item.total .value { color: var(--primary); }
+.down-badge {
+  display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 6px;
+  background: var(--danger); color: #fff; font-size: 12px; font-weight: 600;
+  vertical-align: middle; line-height: 1.6;
+}
 .result-item.warn { border-color: var(--warn); }
 .result-item.warn .value { color: var(--warn); }
 .result-item.bad { border-color: var(--danger); }

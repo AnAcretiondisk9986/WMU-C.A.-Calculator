@@ -215,6 +215,22 @@ function parseJwText(text) {
 }
 
 /**
+ * 体测降档判定（依据《奖学金实施办法》：优秀学生奖学金要求体测达良好 ≥80 分，
+ * 未达良好者按降一等级评定；保健班/保健科证明不予降档）
+ * @param {number|string} score 体测总分
+ * @param {boolean} isHealthClass 是否保健班/保健科证明
+ * @returns {null|{down:boolean, kind:string}} null=未填写/无效
+ */
+function peVerdict(score, isHealthClass) {
+  if (score === undefined || score === null || score === "") return null;
+  const s = Number(score);
+  if (!isFinite(s)) return null;
+  if (isHealthClass) return { down: false, kind: "health" };
+  if (s >= 80) return { down: false, kind: s >= 90 ? "excellent" : "good" };
+  return { down: true, kind: "below" };
+}
+
+/**
  * 班级排名：对每人每学年（或在校平均）总分排序
  * @param {Array<{name, yearTotals: {[yearKey]: number}|number, overall?: number}>} members
  * @returns 排序后的 [{name, total, rank}]
@@ -234,7 +250,7 @@ function rankMembers(members) {
 
 /* 导出到 window（供浏览器端使用），同时兼容 Node 测试 */
 (function expose() {
-  const api = { round, convertScore, calcC2, calcC1, calcC3, calcYear, calcOverall, rankMembers, parseJwText };
+  const api = { round, convertScore, calcC2, calcC1, calcC3, calcYear, calcOverall, rankMembers, parseJwText, peVerdict };
   if (typeof module !== "undefined" && module.exports) {
     module.exports = api;
   } else if (typeof window !== "undefined") {

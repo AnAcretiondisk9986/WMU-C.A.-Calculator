@@ -230,6 +230,21 @@ t("豆包提示词规范输出（Tab 分隔 4 列）可直接解析", () => {
   assert.ok(warnings.some((w) => w.includes("字母等级") && w.includes("A")), "字母成绩应有提示");
 });
 
+console.log("— 体测降档判定 —");
+t("peVerdict：≥80 不降档、<80 降档、保健班不降档、空/无效返回 null", () => {
+  assert.strictEqual(C.peVerdict(85, false).down, false);
+  assert.strictEqual(C.peVerdict(85, false).kind, "good");
+  assert.strictEqual(C.peVerdict(90, false).kind, "excellent");
+  assert.strictEqual(C.peVerdict(75, false).down, true);
+  assert.strictEqual(C.peVerdict(75, false).kind, "below");
+  assert.strictEqual(C.peVerdict(75, true).down, false);
+  assert.strictEqual(C.peVerdict(75, true).kind, "health");
+  assert.strictEqual(C.peVerdict("", false), null);
+  assert.strictEqual(C.peVerdict("abc", false), null);
+  assert.strictEqual(C.peVerdict(undefined, false), null);
+  assert.strictEqual(C.peVerdict(null, false), null);
+});
+
 console.log("— 双方案 —");
 t("本部 C3 基准 65、仁济 C3 基准 70", () => {
   applyScheme("benbu");

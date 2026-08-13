@@ -75,6 +75,11 @@
     const r = ZCCalc.calcYear(year);
     const c1Cls = r.c1.qualified ? "" : "bad";
     const c2Cls = r.c2Failed ? "bad" : "";
+    // 降档标注：体测未达良好且非保健班时，在 C 分数后显示圆角矩形图标
+    const peV = ZCCalc.peVerdict(year.c3 && year.c3.peScore, !!(year.c3 && year.c3.peHealthClass));
+    const downBadge = peV && peV.down
+      ? '<span class="down-badge" title="体测未达良好（&lt;80 分）且非保健班，优秀学生奖学金评定予以降档">降档</span>'
+      : "";
     box.innerHTML = `
       <div class="result-item ${c1Cls}">
         <div class="label">思想品德 C1（10%）</div>
@@ -95,7 +100,7 @@
       </div>
       <div class="result-item total">
         <div class="label">学年综合成绩 C</div>
-        <div class="value">${r.total}</div>
+        <div class="value">${r.total}${downBadge}</div>
         <div class="extra">C1×10% + C2×70% + C3×20%</div>
       </div>`;
   }
@@ -187,19 +192,15 @@
 
   /* 体测降档判定徽章 HTML（依据《奖学金实施办法》：未达良好<80 按降一等级评定；保健班/保健科证明不予降档） */
   function peBadgeHtml(year) {
-    const score = year.c3.peScore;
-    const hc = !!year.c3.peHealthClass;
     const healthLabel = getActiveScheme().peHealthLabel;
-    const hasScore = score !== undefined && score !== null && score !== "";
-    if (!hasScore) return '<span class="pe-badge none">未填写，无判定</span>';
-    const s = Number(score);
-    if (!isFinite(s)) return '<span class="pe-badge none">成绩无效</span>';
-    if (hc) {
-      return `<span class="pe-badge ok">不予降档</span><span class="pe-reason">${esc(healthLabel)}</span>`;
+    const v = ZCCalc.peVerdict(year.c3.peScore, !!year.c3.peHealthClass);
+    if (!v) {
+      const blank = year.c3.peScore === undefined || year.c3.peScore === null || year.c3.peScore === "";
+      return `<span class="pe-badge none">${blank ? "未填写，无判定" : "成绩无效"}</span>`;
     }
-    if (s >= 80) {
-      const level = s >= 90 ? "优秀" : "良好";
-      return `<span class="pe-badge ok">不予降档</span><span class="pe-reason">${level}（≥80）</span>`;
+    if (!v.down) {
+      const reason = v.kind === "health" ? healthLabel : (v.kind === "excellent" ? "优秀（≥90）" : "良好（≥80）");
+      return `<span class="pe-badge ok">不予降档</span><span class="pe-reason">${esc(reason)}</span>`;
     }
     return '<span class="pe-badge down">予以降档</span><span class="pe-reason">未达良好（&lt;80 分）</span>';
   }
@@ -737,6 +738,7 @@
       year.c3.peScore = e.target.value === "" ? "" : Number(e.target.value);
       save();
       updatePeBadge(year);
+      renderYearOverview(); // 同步 C 分数后的降档标注
     });
     $("#c3-cats").addEventListener("change", (e) => {
       if (e.target.dataset.peHealth === undefined) return;
@@ -745,6 +747,7 @@
       year.c3.peHealthClass = e.target.checked;
       save();
       updatePeBadge(year);
+      renderYearOverview(); // 同步 C 分数后的降档标注
     });
 
     // 快选面板
