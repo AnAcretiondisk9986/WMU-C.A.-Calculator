@@ -4,15 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>学生素质综合测评计算器</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="icon" href="resource/红色透明底方图.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header class="topbar">
     <div class="wrap topbar-inner">
       <div class="brand">
-        <h1>素质综合测评计算器</h1>
-        <p class="sub">依据《学生素质综合测评办法》 · 数据仅保存在本地浏览器</p>
+        <img class="logo" src="resource/红色透明底方图.png" alt="温州医科大学校徽">
+        <div class="brand-titles">
+          <h1>素质综合测评计算器</h1>
+          <p class="sub">依据《学生素质综合测评办法》 · 数据仅保存在本地浏览器</p>
+        </div>
       </div>
       <div class="profile">
         <select id="scheme-select" title="选择测评方案（评分表、基准分随方案切换）">
@@ -97,23 +100,23 @@
           </div>
           <div class="row-actions">
             <button class="btn small" id="btn-add-course" type="button">＋ 添加课程</button>
-            <button class="btn small ghost" id="btn-import-jw" type="button">📋 粘贴文本导入</button>
+            <button class="btn small ghost" id="btn-import-jw" type="button">粘贴文本导入</button>
             <label class="c2-onlyreq" title="与教务系统导出/测评口径一致：排除任意选修课">
               <input type="checkbox" id="c2-only-required"> 仅统计必修+限选
             </label>
           </div>
           <div class="c2-stat" id="c2-stat"></div>
           <details class="batch-help" id="batch-help">
-            <summary>💡 批量导入技巧：截图 → 豆包 OCR 识别 → 粘贴（识别准确、一次可导全部课程）</summary>
+            <summary>批量导入技巧：截图 → 豆包 OCR 识别 → 粘贴（识别准确、一次可导全部课程）</summary>
             <div class="batch-help-body">
               <ol class="batch-steps">
                 <li>在教务系统"学生成绩查询"页截图（务必包含表头行，可整页截图）</li>
                 <li>打开豆包（www.doubao.com），把截图发过去，并粘贴下方提示词（可一键复制）</li>
                 <li>豆包会输出制表符分隔的成绩表，全选复制</li>
-                <li>回到本页 → 点"📋 粘贴文本导入" → Ctrl+V 粘贴 → 自动解析导入</li>
+                <li>回到本页 → 点"粘贴文本导入" → Ctrl+V 粘贴 → 自动解析导入</li>
               </ol>
               <div class="prompt-actions">
-                <button class="btn small" id="btn-copy-prompt" type="button">📋 一键复制提示词</button>
+                <button class="btn small" id="btn-copy-prompt" type="button">一键复制提示词</button>
                 <button class="btn small ghost" id="btn-toggle-prompt" type="button">查看 / 收起提示词</button>
               </div>
               <pre class="prompt-text" id="ocr-prompt-text" hidden></pre>
@@ -181,7 +184,7 @@
         <ul class="formula-list">
           <li>C1 思想品德表现 = min(100, 80 + 加分 − 减分)，合格线 60。</li>
           <li>C2 课程学习成绩 = Σ(考分 × 学分) / Σ学分（学分加权平均分）。</li>
-          <li>C3 发展素质 = min(100, 70 + 各类加分)。</li>
+          <li>C3 发展素质 = min(100, 基准分 + 各类加分)，基准分：本部 65 / 仁济 70。</li>
           <li>学年综合测评成绩 C = C1×10% + C2×70% + C3×20%。</li>
           <li>在校综合测评成绩 = 各学年综合测评成绩的平均值。</li>
         </ul>
@@ -191,7 +194,7 @@
 
   <!-- ============ 快捷添加模态框 ============ -->
   <div class="modal-mask" id="quick-modal" hidden>
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true">
       <div class="modal-head">
         <h3 id="quick-modal-title">按评分表快捷添加</h3>
         <button class="modal-close" id="quick-modal-close" type="button" aria-label="关闭">×</button>
@@ -205,7 +208,7 @@
 
   <!-- ============ 自定义条目模态框 ============ -->
   <div class="modal-mask" id="custom-modal" hidden>
-    <div class="modal small">
+    <div class="modal small" role="dialog" aria-modal="true">
       <div class="modal-head">
         <h3 id="custom-modal-title">自定义条目</h3>
         <button class="modal-close" id="custom-modal-close" type="button" aria-label="关闭">×</button>
@@ -238,7 +241,7 @@
 
   <!-- ============ 教务系统导入模态框 ============ -->
   <div class="modal-mask" id="import-modal" hidden>
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true">
       <div class="modal-head">
         <h3>从教务系统导入课程</h3>
         <button class="modal-close" id="import-modal-close" type="button" aria-label="关闭">×</button>

@@ -180,11 +180,11 @@ const BENBU_COLLEGES = [
     gaokao: null,
     cross: { full: 5, medToMed: 5, nonMedToMed: 0, note: "医学类指原专业毕业学位为医学学位；医学类转入医学类、医学类转入非医学类、非医学类转入非医学类得5分，非医学类转入医学类得0分" },
     majors: [
-      { name: "眼视光医学（5+3 一体化）", top: 0.3, qualify: 0.15, minTotal: 75 },
-      { name: "眼视光医学", top: 0.3, qualify: 0.15, minTotal: 75 },
-      { name: "眼视光医学（新医科班）", top: 0.3, qualify: 0.15, minTotal: 75 },
-      { name: "生物医学工程（眼视光工程新工科班）", top: 0.3, qualify: 0.15, minTotal: 75 },
-      { name: "生物医学工程", top: 0.5, qualify: 0.3, minTotal: 60 }
+      { name: "眼视光医学（5+3 一体化）", med: true, top: 0.3, qualify: 0.15, minTotal: 75 },
+      { name: "眼视光医学", med: true, top: 0.3, qualify: 0.15, minTotal: 75 },
+      { name: "眼视光医学（新医科班）", med: true, top: 0.3, qualify: 0.15, minTotal: 75 },
+      { name: "生物医学工程（眼视光工程新工科班）", med: false, top: 0.3, qualify: 0.15, minTotal: 75 },
+      { name: "生物医学工程", med: false, top: 0.5, qualify: 0.3, minTotal: 60 }
     ]
   },
   {
@@ -233,6 +233,7 @@ const BENBU_COLLEGES = [
   {
     id: "yx", name: "药学院",
     rankFull: 50, interviewMax: 25, interviewLabel: "选拔考核",
+    interviewHint: "重点考察对拟转入领域的涉猎、专业基础与综合素质。",
     specialty: { full: 10, tiers: SPECIALTY_TIERS.s10_2_yx },
     english: "yaoxue",
     gaokao: { full: 5, type: "threshold", label: "转入专业生源地当年最低录取分" },

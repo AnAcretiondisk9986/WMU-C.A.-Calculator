@@ -100,7 +100,7 @@
       </div>
       <div class="result-item total">
         <div class="label">学年综合成绩 C</div>
-        <div class="value">${r.total}${downBadge}</div>
+        <div class="value">${r.total === null ? "—" : r.total}${downBadge}</div>
         <div class="extra">C1×10% + C2×70% + C3×20%</div>
       </div>`;
   }
@@ -115,7 +115,7 @@
       <div class="item-row ${minus ? "minus" : ""}">
         <span class="item-name">${esc(it.name)}</span>
         <span class="item-points">${minus ? "−" : "+"}${Math.abs(it.points)}</span>
-        <button class="del" data-list="${listKey}" data-idx="${adds.indexOf(it) >= 0 ? adds.indexOf(it) : subs.indexOf(it)}" title="删除">✕</button>
+        <button class="del" data-list="${listKey}" data-idx="${adds.indexOf(it) >= 0 ? adds.indexOf(it) : subs.indexOf(it)}" title="删除" aria-label="删除">×</button>
       </div>`;
 
     const addList = $("#c1-add-list");
@@ -181,7 +181,7 @@
           </td>
           <td class="num"><input data-field="credit" type="number" min="0" step="0.5" value="${c.credit ?? ""}" placeholder="学分"></td>
           <td class="num"><input data-field="score" value="${esc(c.score)}" ${scoreAttrs} maxlength="10"></td>
-          <td class="op"><button class="del" data-action="del-course" data-idx="${i}" title="删除">✕</button></td>
+          <td class="op"><button class="del" data-action="del-course" data-idx="${i}" title="删除" aria-label="删除">×</button></td>
         </tr>`;
       }).join("");
     }
@@ -241,7 +241,7 @@
             <div class="item-row">
               <span class="item-name">${esc(it.name)}</span>
               <span class="item-points">+${it.points}</span>
-              <button class="del" data-list="c3_${cat.key}" data-idx="${i}" title="删除">✕</button>
+              <button class="del" data-list="c3_${cat.key}" data-idx="${i}" title="删除" aria-label="删除">×</button>
             </div>`).join("")
         : '<div class="empty-hint">暂无条目</div>';
       return `
@@ -272,7 +272,7 @@
       const r = ZCCalc.calcYear(y);
       return `<div class="overall-item">
         <div class="y-name">${esc(y.name)}</div>
-        <div class="y-total">${r.total}</div>
+        <div class="y-total">${r.total === null ? "—" : r.total}</div>
         <div style="font-size:11px;color:var(--text-soft)">C1 ${r.c1.score} · C2 ${r.c2.score} · C3 ${r.c3.score}</div>
       </div>`;
     }).join("");
@@ -295,7 +295,7 @@
         <td class="num">${m.rank <= 3 ? `<span class="rank-top r${m.rank}">${m.rank}</span>` : m.rank}</td>
         <td>${esc(m.name)}${m.name === myName ? ' <span class="tag" style="font-size:10px">我</span>' : ""}</td>
         <td class="num">${m.total}</td>
-        <td class="op"><button class="del" data-action="del-rank" data-idx="${i}" title="删除">✕</button></td>
+        <td class="op"><button class="del" data-action="del-rank" data-idx="${i}" title="删除" aria-label="删除">×</button></td>
       </tr>`).join("") : "";
   }
 
@@ -649,10 +649,10 @@
       msg.style.color = "var(--ok)";
       try {
         await copyTextToClipboard(OCR_PROMPT);
-        msg.textContent = "✅ 提示词已复制：去豆包把截图和提示词一起发送，得到表格后全选复制，回本页“粘贴文本导入”。";
+        msg.textContent = "提示词已复制：去豆包把截图和提示词一起发送，得到表格后全选复制，回本页“粘贴文本导入”。";
       } catch (e) {
         msg.style.color = "var(--danger)";
-        msg.textContent = "⚠ " + (e && e.message ? e.message : "复制失败");
+        msg.textContent = (e && e.message ? e.message : "复制失败");
       }
     });
 
@@ -783,6 +783,7 @@
       if (!year) { alert("请先录入学年数据"); return; }
       if (!name) { alert("请先在右上角填写姓名"); return; }
       const total = ZCCalc.calcYear(year).total;
+      if (total === null) { alert("当前学年尚无有效课程成绩，无法计算总分"); return; }
       // 若已存在同名则更新
       const idx = state.classMembers.findIndex((m) => m.name === name);
       if (idx >= 0) state.classMembers[idx].total = total;
@@ -828,7 +829,9 @@
     });
     $("#btn-wipe").addEventListener("click", () => {
       if (!confirm("确定清空本浏览器中保存的全部数据吗？此操作不可撤销，建议先导出备份。")) return;
-      state = { profile: { name: "", className: "", studentId: "" }, years: [], classMembers: [] };
+      const keepScheme = state.scheme || "benbu";
+      state = ZCStorage.defaultData();
+      state.scheme = keepScheme; // 清空数据保留当前测评方案，不重置回本部
       currentYearId = null;
       save();
       renderAll();
@@ -840,6 +843,7 @@
       if (e.key === "Escape") {
         if (!$("#quick-modal").hidden) closeQuickModal();
         if (!$("#custom-modal").hidden) closeCustomModal();
+        if (!$("#import-modal").hidden) closeImportModal();
       }
     });
   }

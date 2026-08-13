@@ -2,7 +2,7 @@
 
 基于 GitHub Pages 的纯前端静态网页（零依赖、零构建），依据《学生素质综合测评办法》实现综测计算，并配套独立的**转专业考核计算器**页面。
 
-> ⚠️ 仅供学生自评参考，测评结果以班级测评小组、系及学院认定为准；各系实施细则可能调整指标与分值。
+> 注意：仅供学生自评参考，测评结果以班级测评小组、系及学院认定为准；各系实施细则可能调整指标与分值。
 
 ## 功能
 
@@ -73,9 +73,10 @@ scripts/verify-transfer.js  Playwright 渲染冒烟验证（可选）
 node test/calc.test.js
 node test/transfer.test.js
 
-# 如需运行 DOM 冒烟测试（可选，需要 jsdom）
-npm install jsdom --no-save   # 在临时目录安装
-node smoke.test.js
+# 如需运行渲染冒烟验证（可选，需要 playwright + 本地静态服务器）
+npm i playwright && npx playwright install chromium
+python -m http.server 8137     # 另起一个终端
+node scripts/verify-transfer.js
 ```
 
 ## 计算规则速览

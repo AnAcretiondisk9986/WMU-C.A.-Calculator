@@ -12,6 +12,67 @@
   let scheme = "benbu";          // benbu | renji
   let collegeId = "dyc";         // 当前学院 id
   let majorIdx = 0;              // 当前专业下标
+  let ready = false;             // 首次渲染完成后再写回持久化，避免空值覆盖已保存数据
+
+  /* ---------------- 持久化（localStorage） ---------------- */
+  const T_KEY = "wmu-transfer-v1";
+  const INPUT_IDS = ["in-total", "in-rank", "in-interview", "in-c4", "in-c6", "in-ielts", "in-toefl", "in-gaokao", "in-minadmit"];
+
+  function loadPersist() {
+    try {
+      const raw = localStorage.getItem(T_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+
+  function savePersist() {
+    try {
+      const inputs = {};
+      INPUT_IDS.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) inputs[id] = el.value;
+      });
+      const sp = document.getElementById("in-specialty");
+      const fm = document.getElementById("in-frommed");
+      localStorage.setItem(T_KEY, JSON.stringify({
+        scheme, collegeId, majorIdx, inputs,
+        specialty: sp ? sp.value : "-1",
+        fromMed: fm ? fm.value : "1"
+      }));
+    } catch (e) { /* 隐私模式/配额超限等情况下静默失败 */ }
+  }
+
+  /* 恢复方案/学院/专业选择（在 renderScheme 之前调用） */
+  function restorePersist() {
+    const p = loadPersist();
+    if (!p) return;
+    if (p.scheme === "renji" || p.scheme === "benbu") scheme = p.scheme;
+    if (scheme === "benbu") {
+      if (p.collegeId && ZT.BENBU_COLLEGES.some((c) => c.id === p.collegeId)) collegeId = p.collegeId;
+      const c = getCollege();
+      const mi = Number(p.majorIdx);
+      if (Number.isInteger(mi) && mi >= 0 && mi < c.majors.length) majorIdx = mi;
+    }
+  }
+
+  /* 恢复输入框数值（在 renderScheme 构建 DOM 之后调用） */
+  function restoreInputs() {
+    const p = loadPersist();
+    if (!p) return;
+    if (p.inputs) {
+      Object.keys(p.inputs).forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.value = p.inputs[id];
+      });
+    }
+    const sp = document.getElementById("in-specialty");
+    if (sp && p.specialty !== undefined) {
+      const idx = Number(p.specialty);
+      if (Number.isInteger(idx) && idx >= -1 && idx < sp.options.length) sp.value = String(idx);
+    }
+    const fm = document.getElementById("in-frommed");
+    if (fm && p.fromMed !== undefined) fm.value = p.fromMed === "0" ? "0" : "1";
+  }
 
   /* ---------------- 取当前方案 ---------------- */
   function getCollege() {
@@ -69,7 +130,7 @@
     // 面试
     $("#interview-tag").textContent = `满分 ${c.interviewMax} 分`;
     $("#interview-hint").textContent = c.interviewLabel
-      ? `药学院此项为“选拔考核”，重点考察对拟转入领域的涉猎、专业基础与综合素质。`
+      ? (c.interviewHint || `由面试考核小组打分，重点考察综合素质。`)
       : c.interviewPass
         ? `面试成绩低于合格分 ${c.interviewPass} 分（满分 ${c.interviewMax} 分）不予录取。`
         : `由面试考核小组打分，重点考察综合素质。`;
@@ -208,8 +269,8 @@
     };
     const c = getCollege();
     const m = getMajor();
-    // 眼视光：目标专业是否医学类
-    input.toMed = m ? (c.id === "ysg" && m.name.indexOf("生物医学工程") !== 0 ? 1 : 0) : 1;
+    // 眼视光：目标专业是否医学类（由 major.med 显式标注，避免按名称硬编码）
+    input.toMed = m && m.med ? 1 : 0;
     return input;
   }
 
@@ -225,9 +286,9 @@
     if (res.qualify.ok === null) {
       ql.innerHTML = `<span class="pe-badge none">${esc(rkPct)}</span>`;
     } else if (res.qualify.ok) {
-      ql.innerHTML = `<span class="pe-badge ok">✓ ${esc(rkPct)}</span>`;
+      ql.innerHTML = `<span class="pe-badge ok">${esc(rkPct)}</span>`;
     } else {
-      ql.innerHTML = `<span class="pe-badge down">✗ ${esc(rkPct)}</span>`;
+      ql.innerHTML = `<span class="pe-badge down">${esc(rkPct)}</span>`;
     }
 
     // 结果概览
@@ -273,8 +334,10 @@
 
     // 备注
     const notes = $("#result-notes");
-    const warns = res.warnings.map((w) => `<li class="warn">⚠ ${esc(w)}</li>`).join("");
+    const warns = res.warnings.map((w) => `<li class="warn">${esc(w)}</li>`).join("");
     notes.innerHTML = warns ? `<ul class="result-notes-list">${warns}</ul>` : "";
+
+    if (ready) savePersist();
   }
 
   /* ---------------- 事件绑定 ---------------- */
@@ -306,6 +369,10 @@
   }
 
   /* ---------------- 启动 ---------------- */
+  restorePersist();
   renderScheme();
   bind();
+  restoreInputs();
+  ready = true;
+  calcAndRender(); // 用恢复后的输入重算一次并写回
 })();

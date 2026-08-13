@@ -71,6 +71,12 @@ t("不合格判定：<60 分", () => {
   assert.strictEqual(C.calcC1([], [{ points: -25 }]).qualified, false);
   assert.strictEqual(C.calcC1([], [{ points: -20 }]).qualified, true);
 });
+t("减分过大时 C1 下限为 0（不出现负分）", () => {
+  const r = C.calcC1([], [{ points: -40 }, { points: -50 }, { points: -30 }]);
+  assert.strictEqual(r.score, 0);
+  assert.strictEqual(r.subSum, 120);
+  assert.strictEqual(r.qualified, false);
+});
 
 console.log("— C3 发展素质 —");
 t("基准70 + 加分30 = 100", () => {
@@ -106,6 +112,20 @@ t("在校综合 = 各学年平均", () => {
 });
 t("无学年时 overall 为 null", () => {
   assert.strictEqual(C.calcOverall([]), null);
+});
+t("空学年（无课程）total 为 null", () => {
+  const year = { courses: [], c1: { adds: [], subs: [] }, c3: { items: [] } };
+  const r = C.calcYear(year);
+  assert.strictEqual(r.total, null);
+  assert.strictEqual(r.hasCourses, false);
+  assert.strictEqual(r.c1.score, 80);
+});
+t("在校综合跳过空学年", () => {
+  const y1 = { courses: [{ credit: 4, score: 100 }], c1: { adds: [], subs: [] }, c3: { items: [] } };
+  const empty = { courses: [], c1: { adds: [], subs: [] }, c3: { items: [] } };
+  const o = C.calcOverall([empty, y1, empty]);
+  assert.strictEqual(o.avg, 92);
+  assert.deepStrictEqual(o.totals, [92]);
 });
 
 console.log("— 班级排名 —");

@@ -13,28 +13,39 @@
 const STORAGE_KEY = "wmu-zongce-v1";
 
 const DEFAULT_DATA = {
+  version: 1,             // 数据模型版本（供未来迁移）
   profile: { name: "", className: "", studentId: "" },
   scheme: "benbu",        // 测评方案：benbu 温医大本部（默认）/ renji 仁济学院
   years: [],
   classMembers: []
 };
 
+/** scheme 白名单校验，非法回退默认方案（load 与 import 共用） */
+const normalizeScheme = (scheme) =>
+  (scheme === "renji" || scheme === "benbu") ? scheme : DEFAULT_DATA.scheme;
+
 const ZCStorage = {
+  /** 返回一份全新的默认数据结构（深拷贝，避免外部改动污染默认值） */
+  defaultData() {
+    return JSON.parse(JSON.stringify(DEFAULT_DATA));
+  },
+
   load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return JSON.parse(JSON.stringify(DEFAULT_DATA));
+      if (!raw) return ZCStorage.defaultData();
       const data = JSON.parse(raw);
-      // 合并默认结构，避免旧数据缺字段
+      // 合并默认结构，避免旧数据缺字段；scheme 做白名单校验
       return {
+        version: Number.isInteger(data.version) ? data.version : DEFAULT_DATA.version,
         profile: Object.assign({}, DEFAULT_DATA.profile, data.profile || {}),
-        scheme: data.scheme || DEFAULT_DATA.scheme,
+        scheme: normalizeScheme(data.scheme),
         years: Array.isArray(data.years) ? data.years : [],
         classMembers: Array.isArray(data.classMembers) ? data.classMembers : []
       };
     } catch (e) {
       console.warn("读取本地数据失败，使用空数据", e);
-      return JSON.parse(JSON.stringify(DEFAULT_DATA));
+      return ZCStorage.defaultData();
     }
   },
 
@@ -65,10 +76,11 @@ const ZCStorage = {
    */
   parseImport(text) {
     const data = JSON.parse(text); // 非法 JSON 会抛错
-    if (typeof data !== "object" || data === null) throw new Error("数据格式不正确：应为 JSON 对象");
+    if (typeof data !== "object" || data === null || Array.isArray(data)) throw new Error("数据格式不正确：应为 JSON 对象");
     const out = {
+      version: Number.isInteger(data.version) ? data.version : DEFAULT_DATA.version,
       profile: Object.assign({}, DEFAULT_DATA.profile, data.profile || {}),
-      scheme: (data.scheme === "renji" || data.scheme === "benbu") ? data.scheme : DEFAULT_DATA.scheme,
+      scheme: normalizeScheme(data.scheme),
       years: Array.isArray(data.years) ? data.years : [],
       classMembers: Array.isArray(data.classMembers) ? data.classMembers : []
     };
@@ -92,4 +104,8 @@ const ZCStorage = {
   }
 };
 
-if (typeof window !== "undefined") window.ZCStorage = ZCStorage;
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { ZCStorage, DEFAULT_DATA, normalizeScheme };
+} else if (typeof window !== "undefined") {
+  window.ZCStorage = ZCStorage;
+}

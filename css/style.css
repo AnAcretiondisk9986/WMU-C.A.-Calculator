@@ -34,6 +34,9 @@ body {
 /* ---------- 顶栏 ---------- */
 .topbar { background: linear-gradient(135deg, #1e55c0 0%, #2f6fed 100%); color: #fff; padding: 18px 0; }
 .topbar-inner { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand .logo { height: 44px; width: 44px; flex: none; background: #fff; border-radius: 10px; padding: 4px; object-fit: contain; }
+.brand-titles { min-width: 0; }
 .brand h1 { margin: 0; font-size: 22px; letter-spacing: .5px; }
 .brand .sub { margin: 4px 0 0; font-size: 12px; opacity: .85; }
 .profile { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -180,7 +183,7 @@ body {
 
 /* ---------- 课程表 ---------- */
 .course-table-wrap {
-  max-height: 280px; overflow-y: auto; border: 1px solid var(--line); border-radius: 10px;
+  max-height: 280px; overflow: auto; border: 1px solid var(--line); border-radius: 10px;
   margin-bottom: 10px; scrollbar-width: thin; scrollbar-color: #c6ccd6 transparent;
 }
 .course-table-wrap::-webkit-scrollbar { width: 8px; }
@@ -234,7 +237,7 @@ body {
 .pe-check { display: flex; align-items: center; gap: 6px; font-size: 13px; padding-bottom: 7px; cursor: pointer; user-select: none; }
 .pe-check input { width: 15px; height: 15px; accent-color: var(--primary); }
 .pe-result { margin-top: 8px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.pe-badge { display: inline-flex; padding: 3px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+.pe-badge { display: inline-flex; padding: 3px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; white-space: normal; max-width: 100%; text-align: left; }
 .pe-badge.down { background: #fdecec; color: var(--danger); border: 1px solid #f5b5b5; }
 .pe-badge.ok { background: #e7f6ee; color: var(--ok); border: 1px solid #b5e3c8; }
 .pe-badge.none { background: #f1f3f7; color: var(--text-soft); border: 1px solid var(--line); font-weight: 500; }
@@ -298,7 +301,7 @@ body {
 .modal-head h3 { margin: 0; font-size: 15px; }
 .modal-close { border: none; background: none; font-size: 22px; line-height: 1; color: var(--text-soft); cursor: pointer; padding: 0 4px; }
 .modal-close:hover { color: var(--danger); }
-.modal-body { padding: 14px 18px; overflow-y: auto; }
+.modal-body { padding: 14px 18px; overflow: auto; }
 .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--line); }
 
 /* 快选项列表 */
@@ -319,10 +322,11 @@ body {
 .matrix-table .q-btn { width: 100%; }
 
 /* 字段 */
-.field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+.field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; min-width: 0; }
 .field span { font-size: 12.5px; color: var(--text-soft); }
 .field input {
   border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font-size: 14px;
+  width: 100%; min-width: 0;
 }
 .field input:focus { outline: none; border-color: var(--primary); }
 
@@ -352,12 +356,14 @@ a.tab-btn { text-decoration: none; display: inline-block; }
 .field.grow { flex: 2 !important; min-width: 220px; }
 .field select {
   border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font-size: 14px; background: #fff;
+  width: 100%; min-width: 0;
 }
 .field select:focus { outline: none; border-color: var(--primary); }
 
 .input-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 18px; }
 .field-group {
   border: 1px dashed var(--line); border-radius: 10px; padding: 12px 14px; background: #fbfcff;
+  min-width: 0;
 }
 .field-group h3 {
   margin: 0 0 8px; font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
@@ -375,7 +381,7 @@ a.tab-btn { text-decoration: none; display: inline-block; }
 .detail-table thead th { background: #f5f7fb; color: var(--text-soft); font-size: 12.5px; font-weight: 500; }
 .detail-table th.num, .detail-table td.num { width: 70px; text-align: center; }
 .detail-table td.strong { font-weight: 700; color: var(--primary); }
-.detail-table td.cell-note { font-size: 12.5px; color: var(--text-soft); }
+.detail-table td.cell-note { font-size: 12.5px; color: var(--text-soft); overflow-wrap: anywhere; word-break: break-word; }
 .detail-table tr.total-row td { background: #f4f8ff; font-weight: 700; border-top: 2px solid var(--primary); }
 
 .doc-list { margin: 4px 0 10px; padding-left: 20px; }
@@ -388,4 +394,10 @@ a.tab-btn { text-decoration: none; display: inline-block; }
 
 @media (max-width: 640px) {
   .input-grid { grid-template-columns: 1fr; }
+}
+
+/* 平板断点：转专业录入区单列、结果概览两列，避免长选项溢出 */
+@media (max-width: 900px) {
+  .input-grid { grid-template-columns: 1fr; }
+  .result-grid { grid-template-columns: repeat(2, 1fr); }
 }

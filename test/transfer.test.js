@@ -13,8 +13,8 @@ const {
 
 let pass = 0, fail = 0;
 function test(name, fn) {
-  try { fn(); pass++; console.log("✓", name); }
-  catch (e) { fail++; console.error("✗", name, "\n  ", e.message); }
+  try { fn(); pass++; console.log("[PASS]", name); }
+  catch (e) { fail++; console.error("[FAIL]", name, "\n  ", e.message); }
 }
 function eq(actual, expected, label) {
   assert.strictEqual(actual, expected, `${label}: 期望 ${expected}，实际 ${actual}`);
@@ -155,6 +155,15 @@ test("跨专业：UI 传字符串值（select value \"1\"/\"0\"）同样正确",
   eq(crossScore(c, "0", 1).score, 0, "UI 非医→医");
   eq(crossScore(c, "1", 0).score, 5, "UI 医→非医");
   eq(crossScore(c, "0", 0).score, 5, "UI 非医→非医");
+});
+
+test("眼视光专业医学类标记：医学专业 med=true，生物医学工程 med=false", () => {
+  const c = BENBU_COLLEGES.find(x => x.id === "ysg");
+  eq(c.majors[0].med, true, "眼视光医学 5+3");
+  eq(c.majors[1].med, true, "眼视光医学");
+  eq(c.majors[2].med, true, "眼视光医学 新医科班");
+  eq(c.majors[3].med, false, "生物医学工程 新工科班");
+  eq(c.majors[4].med, false, "生物医学工程");
 });
 
 test("英语满分推导：5 分制学院显示满分 5，10 分制显示 10", () => {

@@ -3,7 +3,7 @@
  * 依据《学生素质综合测评办法》：
  *   C1 = min(100, 80 + Σ加分 - Σ减分)
  *   C2 = Σ(成绩×学分) / Σ学分        （五级分制先换算）
- *   C3 = min(100, 70 + Σ加分)
+ *   C3 = min(100, 基准分 + Σ加分)（基准：本部 65 / 仁济 70）
  *   C  = C1×10% + C2×70% + C3×20%
  *   在校综合测评成绩 = 各学年 C 的平均值
  * ========================================================================= */
@@ -73,7 +73,7 @@ function calcC1(adds, subs) {
   const addSum = sum(adds);
   const subSum = Math.abs(sum(subs)); // 减分总量（正数）
   const raw = BASE_C1 + addSum - subSum;
-  const score = Math.min(CAP, raw);
+  const score = Math.min(CAP, Math.max(0, raw)); // 下限 0：减分过大时不出现负分
   return { score: round(score), addSum: round(addSum), subSum: round(subSum), qualified: score >= C1_PASS };
 }
 
@@ -94,7 +94,7 @@ function calcC3(items) {
 /**
  * 单学年综合成绩
  * @param {object} year {courses, c1:{adds,subs}, c3:{items}}
- * @returns {{c1, c2, c3, total, c2Failed}}
+ * @returns {{c1, c2, c3, total, c2Failed, hasCourses}} total 无有效课程时为 null
  */
 function calcYear(year) {
   const y = year || {};
@@ -102,8 +102,9 @@ function calcYear(year) {
   const c2 = calcC2(y.courses, { excludeOptional: !!y.c2OnlyRequired });
   const c3 = calcC3(y.c3 && y.c3.items);
   const c2Failed = c2.creditSum > 0 && c2.failCredits >= C2_FAIL_CREDITS;
-  const total = round(c1.score * WEIGHTS.c1 + c2.score * WEIGHTS.c2 + c3.score * WEIGHTS.c3);
-  return { c1, c2, c3, total, c2Failed };
+  const hasCourses = c2.creditSum > 0;
+  const total = hasCourses ? round(c1.score * WEIGHTS.c1 + c2.score * WEIGHTS.c2 + c3.score * WEIGHTS.c3) : null;
+  return { c1, c2, c3, total, c2Failed, hasCourses };
 }
 
 /**
@@ -111,7 +112,7 @@ function calcYear(year) {
  */
 function calcOverall(years) {
   const list = (Array.isArray(years) ? years : []).filter(y => y);
-  const totals = list.map(calcYear).map(r => r.total);
+  const totals = list.map(calcYear).filter(r => r.total !== null).map(r => r.total);
   if (!totals.length) return null;
   const avg = totals.reduce((a, b) => a + b, 0) / totals.length;
   return { avg: round(avg), totals };

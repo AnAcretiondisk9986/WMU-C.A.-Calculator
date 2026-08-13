@@ -76,9 +76,9 @@ const { chromium } = require("playwright");
   // 6. index.html 链接存在
   await page.goto("http://127.0.0.1:8137/index.html", { waitUntil: "networkidle" });
   const link = await page.$('a[href="transfer.html"]');
-  console.log("index.html 转专业链接:", link ? "存在 ✓" : "缺失 ✗");
+  console.log("index.html 转专业链接:", link ? "存在" : "缺失");
 
-  console.log(errors.length ? "console 错误:\n" + errors.join("\n") : "无 console 错误 ✓");
+  console.log(errors.length ? "console 错误:\n" + errors.join("\n") : "无 console 错误");
   await browser.close();
   process.exit(errors.length ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
