@@ -79,7 +79,7 @@
       <div class="result-item ${c1Cls}">
         <div class="label">思想品德 C1（10%）</div>
         <div class="value">${r.c1.score}</div>
-        <div class="extra">基准80 ${r.c1.addSum ? "+" + r.c1.addSum : ""} ${r.c1.subSum ? "−" + r.c1.subSum : ""}
+        <div class="extra">基准${BASE_C1} ${r.c1.addSum ? "+" + r.c1.addSum : ""} ${r.c1.subSum ? "−" + r.c1.subSum : ""}
           ${r.c1.qualified ? "" : " · 不合格"}</div>
       </div>
       <div class="result-item ${c2Cls}">
@@ -91,7 +91,7 @@
       <div class="result-item">
         <div class="label">发展素质 C3（20%）</div>
         <div class="value">${r.c3.score}</div>
-        <div class="extra">基准70 ${r.c3.addSum ? "+" + r.c3.addSum : ""}</div>
+        <div class="extra">基准${BASE_C3} ${r.c3.addSum ? "+" + r.c3.addSum : ""}</div>
       </div>
       <div class="result-item total">
         <div class="label">学年综合成绩 C</div>
@@ -173,16 +173,17 @@
     renderC2Stat();
   }
 
-  /* 体测降档判定徽章 HTML（依据《奖学金实施办法》：未达良好<80 按降一等级评定；保健班不予降档） */
+  /* 体测降档判定徽章 HTML（依据《奖学金实施办法》：未达良好<80 按降一等级评定；保健班/保健科证明不予降档） */
   function peBadgeHtml(year) {
     const score = year.c3.peScore;
     const hc = !!year.c3.peHealthClass;
+    const healthLabel = getActiveScheme().peHealthLabel;
     const hasScore = score !== undefined && score !== null && score !== "";
     if (!hasScore) return '<span class="pe-badge none">未填写，无判定</span>';
     const s = Number(score);
     if (!isFinite(s)) return '<span class="pe-badge none">成绩无效</span>';
     if (hc) {
-      return '<span class="pe-badge ok">不予降档</span><span class="pe-reason">保健班</span>';
+      return `<span class="pe-badge ok">不予降档</span><span class="pe-reason">${esc(healthLabel)}</span>`;
     }
     if (s >= 80) {
       const level = s >= 90 ? "优秀" : "良好";
@@ -194,6 +195,7 @@
   function renderPeCard(year) {
     const score = year.c3.peScore;
     const hc = !!year.c3.peHealthClass;
+    const healthLabel = getActiveScheme().peHealthLabel;
     return `
       <div class="pe-card">
         <div class="pe-head">体质测试 <span class="tag">奖学金降档判定</span></div>
@@ -201,10 +203,10 @@
           <label class="pe-score-label">体测总分
             <input type="number" data-pe-score min="0" max="100" step="1" placeholder="0-100" value="${esc(score)}">
           </label>
-          <label class="pe-check"><input type="checkbox" data-pe-health ${hc ? "checked" : ""}> 保健班</label>
+          <label class="pe-check"><input type="checkbox" data-pe-health ${hc ? "checked" : ""}> ${esc(healthLabel)}</label>
         </div>
         <div class="pe-result" data-pe-result>${peBadgeHtml(year)}</div>
-        <p class="hint">依据《奖学金实施办法》：优秀学生奖学金要求体测达良好及以上（≥80 分）；未达良好者按降一等级评定，保健班不予降档。</p>
+        <p class="hint">依据《奖学金实施办法》：优秀学生奖学金要求体测达良好及以上（≥80 分）；未达良好者按降一等级评定，${esc(healthLabel)}不予降档。</p>
       </div>`;
   }
 
@@ -284,8 +286,15 @@
       </tr>`).join("") : "";
   }
 
+  function renderSchemeSelect() {
+    const sel = $("#scheme-select");
+    if (sel) sel.value = getSchemeKey();
+  }
+
   function renderAll() {
+    setScheme(state.scheme || "benbu"); // 保证评分表/基准分/权重使用当前方案
     ensureDefaultYear();
+    renderSchemeSelect();
     renderYearSelect();
     renderYearOverview();
     renderC1();
@@ -293,6 +302,17 @@
     renderC3();
     renderOverall();
     renderRank();
+  }
+
+  /* 按快选目标返回对应评分表数据（兼容双方案：C1_* 与 C3_CATEGORIES 为全局，随方案切换） */
+  function getItemList(target) {
+    if (target === "c1_add") return C1_ADD_ITEMS;
+    if (target === "c1_sub") return C1_SUB_ITEMS;
+    if (target && target.startsWith("c3_")) {
+      const cat = C3_CATEGORIES.find((c) => c.key === target.slice(3));
+      return cat ? cat.items : [];
+    }
+    return [];
   }
 
   /* ---------------- 快捷添加面板 ---------------- */
@@ -306,12 +326,7 @@
     $("#quick-modal-title").textContent = titleMap[target] || "快捷添加";
     const body = $("#quick-modal-body");
 
-    const itemList = target === "c1_add" ? C1_ADD_ITEMS
-      : target === "c1_sub" ? C1_SUB_ITEMS
-      : target === "c3_study" ? C3_STUDY_ITEMS
-      : target === "c3_social" ? C3_SOCIAL_ITEMS
-      : target === "c3_innov" ? C3_INNOV_ITEMS
-      : C3_SPORTS_ITEMS;
+    const itemList = getItemList(target);
 
     body.innerHTML = itemList.map((it, gi) => {
       const hint = it.hint ? `<span class="q-hint">（${esc(it.hint)}）</span>` : "";
@@ -347,12 +362,7 @@
     const year = getCurrentYear();
     if (!year || !quickTarget) return;
     const listName = quickTarget;
-    const itemList = listName === "c1_add" ? C1_ADD_ITEMS
-      : listName === "c1_sub" ? C1_SUB_ITEMS
-      : listName === "c3_study" ? C3_STUDY_ITEMS
-      : listName === "c3_social" ? C3_SOCIAL_ITEMS
-      : listName === "c3_innov" ? C3_INNOV_ITEMS
-      : C3_SPORTS_ITEMS;
+    const itemList = getItemList(listName);
     const item = itemList[gi];
     const name = `${item.label}（${levelLabel}）`;
     let p = Number(points);
@@ -469,6 +479,14 @@
         save();
         renderRank();
       });
+    });
+
+    // 测评方案切换
+    $("#scheme-select").addEventListener("change", (e) => {
+      state.scheme = e.target.value;
+      setScheme(state.scheme);
+      save();
+      renderAll();
     });
 
     // 学年

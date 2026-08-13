@@ -4,17 +4,29 @@
 const assert = require("assert");
 const D = require("../js/data.js");
 const C = require("../js/calc.js");
-// 将 data.js 的常量挂到 calc 需要的全局
-global.FIVE_GRADE = D.FIVE_GRADE;
-global.BASE_C1 = D.BASE_C1;
-global.BASE_C3 = D.BASE_C3;
-global.CAP = D.CAP;
-global.C1_PASS = D.C1_PASS;
-global.C2_FAIL_CREDITS = D.C2_FAIL_CREDITS;
-global.WEIGHTS = D.WEIGHTS;
+
+// 将当前方案的常量挂到 calc 需要的全局
+function applyScheme(key) {
+  D.setScheme(key);
+  global.FIVE_GRADE = D.FIVE_GRADE();
+  global.WEIGHTS = D.WEIGHTS();
+  global.BASE_C1 = D.BASE_C1();
+  global.BASE_C3 = D.BASE_C3();
+  global.CAP = D.CAP();
+  global.C1_PASS = D.C1_PASS();
+  global.C2_FAIL_CREDITS = D.C2_FAIL_CREDITS();
+}
 
 let passed = 0;
 function t(name, fn) { fn(); passed++; console.log("  ✔ " + name); }
+
+console.log("— 双方案（默认） —");
+t("默认方案为温医大本部", () => {
+  assert.strictEqual(D.getSchemeKey(), "benbu");
+  assert.strictEqual(D.getActiveScheme().label, "温医大本部");
+});
+
+applyScheme("renji"); // 主流程按仁济（C3 基准 70）
 
 console.log("— C2 学分加权平均 —");
 t("简单加权：高数5学分90 + 英语3学分80 = 86.25", () => {
@@ -107,5 +119,33 @@ t("降序排名 + 并列名次", () => {
   assert.deepStrictEqual(r.map(x => x.name), ["甲", "乙", "丙", "丁"]);
   assert.deepStrictEqual(r.map(x => x.rank), [1, 2, 2, 4]);
 });
+
+console.log("— 双方案 —");
+t("本部 C3 基准 65、仁济 C3 基准 70", () => {
+  applyScheme("benbu");
+  assert.strictEqual(C.calcC3([]).score, 65);
+  applyScheme("renji");
+  assert.strictEqual(C.calcC3([]).score, 70);
+});
+t("两套方案 C1 基准/权重/五级换算一致", () => {
+  applyScheme("benbu");
+  assert.strictEqual(C.calcC1([], []).score, 80);
+  assert.strictEqual(C.calcC2([{ credit: 2, score: "优" }]).score, 90);
+  applyScheme("renji");
+  assert.strictEqual(C.calcC1([], []).score, 80);
+});
+t("本部 C3 加分后总分使用 65 基准", () => {
+  applyScheme("benbu");
+  const year = {
+    courses: [{ credit: 4, score: 90 }],
+    c1: { adds: [], subs: [] },
+    c3: { items: [{ points: 11 }] } // C3 = 65 + 11 = 76
+  };
+  const r = C.calcYear(year);
+  // C = 80×0.1 + 90×0.7 + 76×0.2 = 8 + 63 + 15.2 = 86.2
+  assert.strictEqual(r.total, 86.2);
+  assert.strictEqual(r.c3.score, 76);
+});
+applyScheme("renji");
 
 console.log("\n全部通过：" + passed + " 项");

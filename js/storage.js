@@ -14,6 +14,7 @@ const STORAGE_KEY = "wmu-zongce-v1";
 
 const DEFAULT_DATA = {
   profile: { name: "", className: "", studentId: "" },
+  scheme: "benbu",        // 测评方案：benbu 温医大本部（默认）/ renji 仁济学院
   years: [],
   classMembers: []
 };
@@ -27,6 +28,7 @@ const ZCStorage = {
       // 合并默认结构，避免旧数据缺字段
       return {
         profile: Object.assign({}, DEFAULT_DATA.profile, data.profile || {}),
+        scheme: data.scheme || DEFAULT_DATA.scheme,
         years: Array.isArray(data.years) ? data.years : [],
         classMembers: Array.isArray(data.classMembers) ? data.classMembers : []
       };
@@ -66,6 +68,7 @@ const ZCStorage = {
     if (typeof data !== "object" || data === null) throw new Error("数据格式不正确：应为 JSON 对象");
     const out = {
       profile: Object.assign({}, DEFAULT_DATA.profile, data.profile || {}),
+      scheme: (data.scheme === "renji" || data.scheme === "benbu") ? data.scheme : DEFAULT_DATA.scheme,
       years: Array.isArray(data.years) ? data.years : [],
       classMembers: Array.isArray(data.classMembers) ? data.classMembers : []
     };

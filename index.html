@@ -15,6 +15,10 @@
         <p class="sub">依据《学生素质综合测评办法》 · 数据仅保存在本地浏览器</p>
       </div>
       <div class="profile">
+        <select id="scheme-select" title="选择测评方案（评分表、基准分随方案切换）">
+          <option value="benbu" selected>温医大本部</option>
+          <option value="renji">仁济学院</option>
+        </select>
         <input type="text" id="profile-name" placeholder="姓名" maxlength="20" title="姓名">
         <input type="text" id="profile-class" placeholder="班级" maxlength="30" title="班级">
         <input type="text" id="profile-id" placeholder="学号" maxlength="20" title="学号">
@@ -94,7 +98,7 @@
         <!-- C3 -->
         <div class="card section" id="section-c3">
           <h2>发展素质 <span class="tag">C3 · 权重 20%</span></h2>
-          <p class="hint">基准分 70，只加分，最高不超过 100 分。分学习能力、社会活动与社会工作、创新创业成果、文体素质四类。</p>
+          <p class="hint">基准分按方案（本部 65 / 仁济 70），只加分，最高不超过 100 分。分学习能力、社会活动与社会工作、创新创业成果、文体素质四类。</p>
           <div id="c3-cats"></div>
         </div>
       </div>
