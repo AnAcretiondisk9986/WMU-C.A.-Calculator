@@ -209,6 +209,26 @@ t("五级制别名换算：优秀/良好/中等/合格/不合格", () => {
   ]);
   assert.strictEqual(r.score, (90 + 80 + 70 + 60 + 50) / 5);
 });
+t("豆包提示词规范输出（Tab 分隔 4 列）可直接解析", () => {
+  // 模拟豆包按提示词输出的格式：表头 4 列 + 数字/等级/字母成绩混合
+  const text = [
+    "课程名称\t课程性质\t学分\t成绩",
+    "高等数学（1）\t必修课\t4.0\t90",
+    "大学英语\t必修课\t3.0\t良",
+    "英语（2）\t必修课\t3.0\tA",
+    "儒学与日本文化\t任意选修课\t2.0\t优秀",
+    "国家安全教育\t必修课\t1.0\t合格"
+  ].join("\n");
+  const { courses, warnings } = C.parseJwText(text);
+  assert.strictEqual(courses.length, 5);
+  assert.strictEqual(courses[0].name, "高等数学（1）");
+  assert.strictEqual(courses[0].score, 90);
+  assert.strictEqual(courses[1].score, "良");           // 等级制保留原文
+  assert.strictEqual(courses[2].score, "");             // 字母成绩无法换算 → 留空待手动填写
+  assert.strictEqual(courses[3].type, "optional");      // 任选课自动标记
+  assert.strictEqual(courses[4].score, "合格");
+  assert.ok(warnings.some((w) => w.includes("字母等级") && w.includes("A")), "字母成绩应有提示");
+});
 
 console.log("— 双方案 —");
 t("本部 C3 基准 65、仁济 C3 基准 70", () => {

@@ -476,6 +476,57 @@
     renderAll();
   }
 
+  /* ---------------- 豆包批量导入提示词 ---------------- */
+  const OCR_PROMPT = [
+    "你是教务系统成绩表格的转写助手。我会发给你一张成绩查询页面的截图，请按以下要求处理：",
+    "",
+    "【输出格式】",
+    "1. 只输出一个表格：第一行为表头，固定为：课程名称、课程性质、学分、成绩",
+    "2. 列与列之间用制表符（Tab）分隔，每行一门课程，行与行之间换行",
+    "3. 只输出表格本身：不要任何解释、问候、序号、统计行，不要使用代码块（不要 ``` 和 markdown 标记）",
+    "",
+    "【各列规则】",
+    "- 课程名称：严格照抄截图，不增字、不减字、不加多余空格或标点（如\"高等数学（1）\"原样输出）",
+    "- 课程性质：按截图输出，只能是 必修课 / 限制性选修课 / 任意选修课",
+    "- 学分：只输出数字（如 2.0、3.5），不要带\"学分\"等文字",
+    "- 成绩：数字成绩原样输出（如 90、80.5）；等级制成绩输出中文并照抄截图（合格、优秀、良好、中等、不及格等）；字母成绩原样输出（如 A、B）；成绩为空或看不清输出 ?",
+    "",
+    "【输出前必须自检（自检过程不要显示出来）】",
+    "1. 逐行核对课程名称是否与截图完全一致",
+    "2. 核对学分列与成绩列有没有对调或错位",
+    "3. 核对成绩数值与截图一致，特别注意 0 和 O、1 和 l、7 和 1 等易混字符",
+    "4. 确认表头行就是：课程名称 [Tab] 课程性质 [Tab] 学分 [Tab] 成绩",
+    "5. 若截图模糊、缺少表头或无法辨认，直接输出\"无法识别\"四个字，绝对不要编造数据",
+    "6. 若截图不是成绩表格，直接输出\"这不是成绩表格\"",
+    "",
+    "【格式示例】（仅示意，不要把示例行混入输出）",
+    "课程名称\t课程性质\t学分\t成绩",
+    "高等数学（1）\t必修课\t4.0\t90",
+    "大学英语\t必修课\t3.0\t良"
+  ].join("\n");
+
+  function copyTextToClipboard(text) {
+    return new Promise((resolve, reject) => {
+      const doFallback = () => {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        let ok = false;
+        try { ok = document.execCommand("copy"); } catch (e) { /* ignore */ }
+        document.body.removeChild(ta);
+        if (ok) resolve(); else reject(new Error("复制失败，请展开提示词手动选择复制"));
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(resolve).catch(doFallback);
+      } else {
+        doFallback();
+      }
+    });
+  }
+
   /* ---------------- 事件绑定 ---------------- */
   function bindEvents() {
     // Tab 切换
@@ -581,6 +632,25 @@
       save();
       renderYearOverview();
       renderC2Stat();
+    });
+
+    // 豆包批量导入：提示词查看与一键复制
+    $("#btn-toggle-prompt").addEventListener("click", () => {
+      const pre = $("#ocr-prompt-text");
+      pre.hidden = !pre.hidden;
+      if (!pre.hidden && !pre.textContent) pre.textContent = OCR_PROMPT;
+      $("#prompt-copied-msg").textContent = "";
+    });
+    $("#btn-copy-prompt").addEventListener("click", async () => {
+      const msg = $("#prompt-copied-msg");
+      msg.style.color = "var(--ok)";
+      try {
+        await copyTextToClipboard(OCR_PROMPT);
+        msg.textContent = "✅ 提示词已复制：去豆包把截图和提示词一起发送，得到表格后全选复制，回本页“粘贴文本导入”。";
+      } catch (e) {
+        msg.style.color = "var(--danger)";
+        msg.textContent = "⚠ " + (e && e.message ? e.message : "复制失败");
+      }
     });
 
     // 教务系统 OCR 截图导入

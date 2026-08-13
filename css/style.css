@@ -181,6 +181,28 @@ body {
 .ocr-preview-table input:hover { border-color: var(--line); }
 .ocr-preview-table input:focus { outline: none; border-color: var(--primary); background: #fff; }
 
+/* 豆包批量导入引导 */
+.batch-help {
+  margin-top: 10px; border: 1px solid var(--line); border-radius: 10px; background: #fafbfe;
+  padding: 0;
+}
+.batch-help > summary {
+  cursor: pointer; padding: 9px 12px; font-size: 13px; color: var(--primary-dark);
+  font-weight: 600; user-select: none; list-style: none;
+}
+.batch-help > summary::before { content: "▸ "; color: var(--primary); }
+.batch-help[open] > summary::before { content: "▾ "; }
+.batch-help > summary:hover { background: #f2f5fb; border-radius: 10px; }
+.batch-help-body { padding: 4px 12px 12px; border-top: 1px dashed var(--line); }
+.batch-steps { margin: 8px 0 10px; padding-left: 20px; font-size: 13px; }
+.batch-steps li { margin-bottom: 4px; }
+.prompt-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.prompt-text {
+  background: #f6f8fc; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+  font-size: 12px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: break-word;
+  font-family: Consolas, "Courier New", monospace; max-height: 260px; overflow-y: auto;
+}
+
 /* ---------- 课程表 ---------- */
 .course-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
 .course-table th, .course-table td {

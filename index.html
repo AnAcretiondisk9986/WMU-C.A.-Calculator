@@ -101,6 +101,23 @@
             </label>
           </div>
           <div class="c2-stat" id="c2-stat"></div>
+          <details class="batch-help" id="batch-help">
+            <summary>💡 批量导入技巧：截图 → 豆包 OCR 识别 → 粘贴（比本地 OCR 更准）</summary>
+            <div class="batch-help-body">
+              <ol class="batch-steps">
+                <li>在教务系统"学生成绩查询"页截图（务必包含表头行，可整页截图）</li>
+                <li>打开豆包（www.doubao.com），把截图发过去，并粘贴下方提示词（可一键复制）</li>
+                <li>豆包会输出制表符分隔的成绩表，全选复制</li>
+                <li>回到本页 → 点"📋 粘贴文本导入（备用）" → Ctrl+V 粘贴 → 自动解析导入</li>
+              </ol>
+              <div class="prompt-actions">
+                <button class="btn small" id="btn-copy-prompt" type="button">📋 一键复制提示词</button>
+                <button class="btn small ghost" id="btn-toggle-prompt" type="button">查看 / 收起提示词</button>
+              </div>
+              <pre class="prompt-text" id="ocr-prompt-text" hidden></pre>
+              <p class="hint" id="prompt-copied-msg" style="color:var(--ok);margin-top:6px"></p>
+            </div>
+          </details>
         </div>
 
         <!-- C3 -->
