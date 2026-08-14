@@ -349,6 +349,8 @@ body {
 .field input:focus { outline: none; border-color: var(--primary); }
 
 .footer { text-align: center; color: var(--text-soft); font-size: 12px; padding: 8px 16px 24px; }
+.footer .site-stat { margin-top: 4px; }
+.footer .site-stat span { color: var(--primary); font-weight: 600; }
 
 /* 空状态 */
 .empty-hint { color: var(--text-soft); font-size: 12.5px; font-style: italic; }
