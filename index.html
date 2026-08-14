@@ -292,11 +292,13 @@
         <div class="archive-bar">
           <input type="text" id="archive-name" placeholder="档案名称，如：本人 · 大一" maxlength="30">
           <button class="btn" id="btn-archive-save" type="button">建立档案</button>
+          <button class="btn ghost" id="btn-archive-sync" type="button" disabled>同步到当前档案</button>
           <label class="btn ghost file-label">
             导入档案卡文件
             <input type="file" id="archive-file" accept=".json,application/json" hidden>
           </label>
         </div>
+        <div class="archive-current" id="archive-current"></div>
         <div class="archive-list" id="archive-list"></div>
         <p class="hint archive-msg" id="archive-msg"></p>
       </div>

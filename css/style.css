@@ -472,6 +472,12 @@ a.tab-btn { text-decoration: none; display: inline-block; }
 .archive-item-actions { display: flex; gap: 6px; flex-wrap: wrap; flex: none; }
 .archive-msg { margin-top: 10px; color: var(--ok); }
 .archive-msg.error { color: var(--danger); }
+.archive-current {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 12.5px; color: var(--text-soft); margin: 0 0 10px;
+}
+.archive-current b { color: var(--text); }
+.archive-item.current { border-color: var(--primary); background: #eef5ff; }
 
 @media (max-width: 640px) {
   .archive-item { flex-direction: column; align-items: stretch; }

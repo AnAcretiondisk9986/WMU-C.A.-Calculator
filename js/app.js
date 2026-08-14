@@ -482,6 +482,7 @@
   /* ---------------- 个人档案卡 ---------------- */
   function openArchiveModal() {
     $("#archive-name").value = (state.profile.name || "").trim();
+    renderArchiveCurrent();
     renderArchiveList();
     const msg = $("#archive-msg");
     msg.textContent = "";
@@ -492,9 +493,42 @@
 
   function closeArchiveModal() { $("#archive-modal").hidden = true; }
 
+  function renderArchiveCurrent() {
+    const box = $("#archive-current");
+    const btn = $("#btn-archive-sync");
+    const id = ZCArchive.getCurrentId();
+    const card = id ? ZCArchive.get(id) : null;
+    if (card) {
+      box.innerHTML = `当前档案卡：<b>${esc(card.name)}</b>`;
+      btn.disabled = false;
+    } else {
+      if (id) ZCArchive.setCurrentId(null); // 卡片被删后清理失效 id
+      box.innerHTML = '<span style="margin:0">尚未选定档案卡——点某张卡的「载入」或「建立档案」后，即可把改动同步回该卡。</span>';
+      btn.disabled = true;
+    }
+  }
+
+  function syncArchive() {
+    const id = ZCArchive.getCurrentId();
+    if (!id) return;
+    const msg = $("#archive-msg");
+    msg.classList.remove("error");
+    try {
+      const card = ZCArchive.update(id, state);
+      renderArchiveList();
+      renderArchiveCurrent();
+      msg.textContent = `已把当前数据同步到档案「${card.name}」。`;
+    } catch (e) {
+      msg.textContent = (e && e.message) || "同步失败";
+      msg.classList.add("error");
+      renderArchiveCurrent();
+    }
+  }
+
   function renderArchiveList() {
     const box = $("#archive-list");
     const list = ZCArchive.list();
+    const curId = ZCArchive.getCurrentId();
     if (!list.length) {
       box.innerHTML = '<div class="empty-hint">暂无档案卡。填写名称后点「建立档案」，或「导入档案卡文件」。</div>';
       return;
@@ -505,10 +539,11 @@
       const courses = years.reduce((a, y) => a + (Array.isArray(y.courses) ? y.courses.length : 0), 0);
       const schemeLabel = data.scheme === "renji" ? "仁济" : "本部";
       const date = String(c.updatedAt || "").slice(0, 10);
+      const isCur = c.id === curId;
       return `
-        <div class="archive-item" data-id="${esc(c.id)}">
+        <div class="archive-item${isCur ? " current" : ""}" data-id="${esc(c.id)}">
           <div class="archive-item-main">
-            <div class="archive-item-name">${esc(c.name)}</div>
+            <div class="archive-item-name">${esc(c.name)}${isCur ? ' <span class="tag" style="font-size:10px">当前</span>' : ""}</div>
             <div class="archive-item-meta">${esc(schemeLabel)} · ${years.length} 学年 · ${courses} 门课 · ${esc(date)}</div>
           </div>
           <div class="archive-item-actions">
@@ -526,7 +561,9 @@
     try {
       const res = ZCArchive.create($("#archive-name").value, state);
       $("#archive-name").value = "";
+      ZCArchive.setCurrentId(res.card.id);
       renderArchiveList();
+      renderArchiveCurrent();
       msg.textContent = res.overwritten
         ? `已更新档案「${res.card.name}」。`
         : `已建立档案「${res.card.name}」，可随时载入。`;
@@ -543,6 +580,7 @@
     state = ZCStorage.parseImport(JSON.stringify(card.data || {}));
     currentYearId = state.years.length ? state.years[0].id : null;
     save();
+    ZCArchive.setCurrentId(id);
     closeArchiveModal();
     renderAll();
   }
@@ -577,6 +615,7 @@
       if (!confirm(`确定删除档案「${card.name}」吗？此操作不可撤销。`)) return;
       ZCArchive.remove(card.id);
       renderArchiveList();
+      renderArchiveCurrent();
       const msg = $("#archive-msg");
       msg.textContent = `已删除档案「${card.name}」。`;
       msg.classList.remove("error");
@@ -953,6 +992,7 @@
     $("#archive-modal-cancel").addEventListener("click", closeArchiveModal);
     $("#archive-modal").addEventListener("click", (e) => { if (e.target === e.currentTarget) closeArchiveModal(); });
     $("#btn-archive-save").addEventListener("click", saveArchive);
+    $("#btn-archive-sync").addEventListener("click", syncArchive);
     $("#archive-name").addEventListener("keydown", (e) => { if (e.key === "Enter") saveArchive(); });
     $("#archive-file").addEventListener("change", (e) => {
       const file = e.target.files[0];

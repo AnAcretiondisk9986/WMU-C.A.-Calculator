@@ -12,6 +12,7 @@
 
 const STORAGE_KEY = "wmu-zongce-v1";
 const ARCHIVE_KEY = "wmu-zongce-archives-v1";
+const ARCHIVE_CURRENT_KEY = "wmu-zongce-archive-current-v1";
 
 const DEFAULT_DATA = {
   version: 1,             // 数据模型版本（供未来迁移）
@@ -134,24 +135,28 @@ const ZCArchive = {
     }
   },
 
-  /** 从主数据建立一张档案卡；同名覆盖，返回 {card, overwritten} */
-  create(name, data) {
-    const cleanName = String(name || "").trim();
-    if (!cleanName) throw new Error("请填写档案名称");
-    const snapshot = {
+  /** 规范化一份主数据为档案卡快照（profile 深拷贝，years/classMembers 保持原引用） */
+  _snapshot(data) {
+    return {
       version: (data && Number.isInteger(data.version)) ? data.version : DEFAULT_DATA.version,
       profile: Object.assign({}, DEFAULT_DATA.profile, (data && data.profile) || {}),
       scheme: normalizeScheme(data && data.scheme),
       years: Array.isArray(data && data.years) ? data.years : [],
       classMembers: Array.isArray(data && data.classMembers) ? data.classMembers : []
     };
+  },
+
+  /** 从主数据建立一张档案卡；同名覆盖，返回 {card, overwritten} */
+  create(name, data) {
+    const cleanName = String(name || "").trim();
+    if (!cleanName) throw new Error("请填写档案名称");
     const list = this.list();
     const existing = list.find((c) => c.name === cleanName);
     const card = {
       id: existing ? existing.id : "a-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6),
       name: cleanName,
       updatedAt: new Date().toISOString(),
-      data: snapshot
+      data: this._snapshot(data)
     };
     const next = existing
       ? list.map((c) => (c.id === existing.id ? card : c))
@@ -160,12 +165,39 @@ const ZCArchive = {
     return { card, overwritten: !!existing };
   },
 
+  /** 将当前数据同步回指定档案卡（保持 id 与名称不变），返回更新后的 card；卡不存在抛错 */
+  update(id, data) {
+    const list = this.list();
+    const idx = list.findIndex((c) => c.id === id);
+    if (idx < 0) throw new Error("档案卡不存在，可能已被删除");
+    const card = Object.assign({}, list[idx], {
+      data: this._snapshot(data),
+      updatedAt: new Date().toISOString()
+    });
+    list[idx] = card;
+    this._saveList(list);
+    return card;
+  },
+
   get(id) {
     return this.list().find((c) => c.id === id) || null;
   },
 
   remove(id) {
     this._saveList(this.list().filter((c) => c.id !== id));
+    if (this.getCurrentId() === id) this.setCurrentId(null);
+  },
+
+  /** 当前档案卡 id（用于「同步」回写），独立 key 持久化 */
+  getCurrentId() {
+    try { return localStorage.getItem(ARCHIVE_CURRENT_KEY) || null; } catch (e) { return null; }
+  },
+  setCurrentId(id) {
+    try {
+      if (id) localStorage.setItem(ARCHIVE_CURRENT_KEY, String(id));
+      else localStorage.removeItem(ARCHIVE_CURRENT_KEY);
+      return true;
+    } catch (e) { return false; }
   },
 
   /** 解析导入文本：支持整张卡 {name, data} 或整份主数据（用姓名作卡名） */
@@ -210,7 +242,7 @@ const ZCArchive = {
 };
 
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { ZCStorage, ZCArchive, DEFAULT_DATA, normalizeScheme, ARCHIVE_KEY };
+  module.exports = { ZCStorage, ZCArchive, DEFAULT_DATA, normalizeScheme, ARCHIVE_KEY, ARCHIVE_CURRENT_KEY };
 } else if (typeof window !== "undefined") {
   window.ZCStorage = ZCStorage;
   window.ZCArchive = ZCArchive;

@@ -141,5 +141,37 @@ t("parseCard 非法输入抛错", () => {
   assert.throws(() => ZCArchive.parseCard("{not json"));
   assert.throws(() => ZCArchive.parseCard("[1,2,3]"));
 });
+t("update 同步数据回档案卡（保持 id/名称不变）", () => {
+  mockLocalStorage();
+  const { card } = ZCArchive.create("本人", ZCStorage.defaultData());
+  const data = ZCStorage.defaultData();
+  data.profile.name = "张三";
+  data.scheme = "renji";
+  const updated = ZCArchive.update(card.id, data);
+  assert.strictEqual(updated.id, card.id);
+  assert.strictEqual(updated.name, "本人");
+  assert.strictEqual(updated.data.profile.name, "张三");
+  assert.strictEqual(updated.data.scheme, "renji");
+  assert.strictEqual(ZCArchive.list().length, 1);
+});
+t("update 不存在的卡抛错", () => {
+  mockLocalStorage();
+  assert.throws(() => ZCArchive.update("nope", ZCStorage.defaultData()));
+});
+t("currentId 设置/读取/清除", () => {
+  mockLocalStorage();
+  assert.strictEqual(ZCArchive.getCurrentId(), null);
+  ZCArchive.setCurrentId("abc");
+  assert.strictEqual(ZCArchive.getCurrentId(), "abc");
+  ZCArchive.setCurrentId(null);
+  assert.strictEqual(ZCArchive.getCurrentId(), null);
+});
+t("remove 删除当前卡时清理 currentId", () => {
+  mockLocalStorage();
+  const { card } = ZCArchive.create("本人", ZCStorage.defaultData());
+  ZCArchive.setCurrentId(card.id);
+  ZCArchive.remove(card.id);
+  assert.strictEqual(ZCArchive.getCurrentId(), null);
+});
 
 console.log("\n全部通过：" + passed + " 项");
