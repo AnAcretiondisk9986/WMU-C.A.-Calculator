@@ -86,7 +86,14 @@
   }
 
   /* ---------------- 渲染：方案选择 ---------------- */
+  function renderSchemeSelect() {
+    document.querySelectorAll('#scheme-select input[type="radio"][name="scheme"]').forEach((r) => {
+      r.checked = r.value === scheme;
+    });
+  }
+
   function renderScheme() {
+    renderSchemeSelect();
     const isBenbu = scheme === "benbu";
     $("#scheme-tag").textContent = isBenbu ? "温医大本部" : "仁济学院";
     $("#college-row").hidden = !isBenbu;
@@ -343,7 +350,9 @@
   /* ---------------- 事件绑定 ---------------- */
   function bind() {
     $("#scheme-select").addEventListener("change", (e) => {
-      scheme = e.target.value;
+      const rb = e.target.closest('input[type="radio"][name="scheme"]');
+      if (!rb) return;
+      scheme = rb.value;
       renderScheme();
     });
     $("#college-select").addEventListener("change", (e) => {

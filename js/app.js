@@ -300,8 +300,10 @@
   }
 
   function renderSchemeSelect() {
-    const sel = $("#scheme-select");
-    if (sel) sel.value = getSchemeKey();
+    const key = getSchemeKey();
+    $$('#scheme-select input[type="radio"][name="scheme"]').forEach((inp) => {
+      inp.checked = inp.value === key;
+    });
   }
 
   function renderAll() {
@@ -477,6 +479,110 @@
     renderAll();
   }
 
+  /* ---------------- 个人档案卡 ---------------- */
+  function openArchiveModal() {
+    $("#archive-name").value = (state.profile.name || "").trim();
+    renderArchiveList();
+    const msg = $("#archive-msg");
+    msg.textContent = "";
+    msg.classList.remove("error");
+    $("#archive-modal").hidden = false;
+    setTimeout(() => $("#archive-name").focus(), 0);
+  }
+
+  function closeArchiveModal() { $("#archive-modal").hidden = true; }
+
+  function renderArchiveList() {
+    const box = $("#archive-list");
+    const list = ZCArchive.list();
+    if (!list.length) {
+      box.innerHTML = '<div class="empty-hint">暂无档案卡。填写名称后点「建立档案」，或「导入档案卡文件」。</div>';
+      return;
+    }
+    box.innerHTML = list.map((c) => {
+      const data = c.data || {};
+      const years = Array.isArray(data.years) ? data.years : [];
+      const courses = years.reduce((a, y) => a + (Array.isArray(y.courses) ? y.courses.length : 0), 0);
+      const schemeLabel = data.scheme === "renji" ? "仁济" : "本部";
+      const date = String(c.updatedAt || "").slice(0, 10);
+      return `
+        <div class="archive-item" data-id="${esc(c.id)}">
+          <div class="archive-item-main">
+            <div class="archive-item-name">${esc(c.name)}</div>
+            <div class="archive-item-meta">${esc(schemeLabel)} · ${years.length} 学年 · ${courses} 门课 · ${esc(date)}</div>
+          </div>
+          <div class="archive-item-actions">
+            <button class="btn small" data-archive-load="${esc(c.id)}" type="button">载入</button>
+            <button class="btn small ghost" data-archive-download="${esc(c.id)}" type="button">下载</button>
+            <button class="btn small danger ghost" data-archive-del="${esc(c.id)}" type="button">删除</button>
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  function saveArchive() {
+    const msg = $("#archive-msg");
+    msg.classList.remove("error");
+    try {
+      const res = ZCArchive.create($("#archive-name").value, state);
+      $("#archive-name").value = "";
+      renderArchiveList();
+      msg.textContent = res.overwritten
+        ? `已更新档案「${res.card.name}」。`
+        : `已建立档案「${res.card.name}」，可随时载入。`;
+    } catch (e) {
+      msg.textContent = (e && e.message) || "建立档案失败";
+      msg.classList.add("error");
+    }
+  }
+
+  function loadArchive(id) {
+    const card = ZCArchive.get(id);
+    if (!card) return;
+    if (!confirm(`载入档案「${card.name}」将覆盖当前全部数据，确定继续吗？`)) return;
+    state = ZCStorage.parseImport(JSON.stringify(card.data || {}));
+    currentYearId = state.years.length ? state.years[0].id : null;
+    save();
+    closeArchiveModal();
+    renderAll();
+  }
+
+  async function importArchiveFile(file) {
+    const msg = $("#archive-msg");
+    msg.classList.remove("error");
+    try {
+      const { name, data } = await ZCArchive.importFromFile(file);
+      ZCArchive.create(name, data);
+      renderArchiveList();
+      msg.textContent = `已导入档案卡「${name}」，点该卡的「载入」可应用到当前数据。`;
+    } catch (e) {
+      msg.textContent = "导入失败：" + (e && e.message ? e.message : "文件格式错误");
+      msg.classList.add("error");
+    }
+  }
+
+  function onArchiveListClick(e) {
+    const loadBtn = e.target.closest("[data-archive-load]");
+    const dlBtn = e.target.closest("[data-archive-download]");
+    const delBtn = e.target.closest("[data-archive-del]");
+    if (loadBtn) { loadArchive(loadBtn.dataset.archiveLoad); return; }
+    if (dlBtn) {
+      const card = ZCArchive.get(dlBtn.dataset.archiveDownload);
+      if (card) ZCArchive.exportCard(card);
+      return;
+    }
+    if (delBtn) {
+      const card = ZCArchive.get(delBtn.dataset.archiveDel);
+      if (!card) return;
+      if (!confirm(`确定删除档案「${card.name}」吗？此操作不可撤销。`)) return;
+      ZCArchive.remove(card.id);
+      renderArchiveList();
+      const msg = $("#archive-msg");
+      msg.textContent = `已删除档案「${card.name}」。`;
+      msg.classList.remove("error");
+    }
+  }
+
   /* ---------------- 豆包批量导入提示词 ---------------- */
   const OCR_PROMPT = [
     "你是教务系统成绩表格的转写助手。我会发给你一张成绩查询页面的截图，请按以下要求处理：",
@@ -545,9 +651,11 @@
       });
     });
 
-    // 测评方案切换
+    // 测评方案切换（分段单选）
     $("#scheme-select").addEventListener("change", (e) => {
-      state.scheme = e.target.value;
+      const rb = e.target.closest('input[type="radio"][name="scheme"]');
+      if (!rb) return;
+      state.scheme = rb.value;
       setScheme(state.scheme);
       save();
       renderAll();
@@ -838,12 +946,28 @@
       $("#manage-msg").textContent = "已清空全部数据。";
     });
 
+    // 个人档案卡
+    $("#btn-open-archive").addEventListener("click", openArchiveModal);
+    $("#btn-manage-archive").addEventListener("click", openArchiveModal);
+    $("#archive-modal-close").addEventListener("click", closeArchiveModal);
+    $("#archive-modal-cancel").addEventListener("click", closeArchiveModal);
+    $("#archive-modal").addEventListener("click", (e) => { if (e.target === e.currentTarget) closeArchiveModal(); });
+    $("#btn-archive-save").addEventListener("click", saveArchive);
+    $("#archive-name").addEventListener("keydown", (e) => { if (e.key === "Enter") saveArchive(); });
+    $("#archive-file").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      importArchiveFile(file).finally(() => { e.target.value = ""; });
+    });
+    $("#archive-list").addEventListener("click", onArchiveListClick);
+
     // 关闭模态框的 Escape
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         if (!$("#quick-modal").hidden) closeQuickModal();
         if (!$("#custom-modal").hidden) closeCustomModal();
         if (!$("#import-modal").hidden) closeImportModal();
+        if (!$("#archive-modal").hidden) closeArchiveModal();
       }
     });
   }

@@ -11,20 +11,27 @@
   <header class="topbar">
     <div class="wrap topbar-inner">
       <div class="brand">
-        <img class="logo" src="resource/红色透明底方图.png" alt="温州医科大学校徽">
+        <img class="logo" src="resource/红色透明底长图.png" alt="温州医科大学校徽">
         <div class="brand-titles">
           <h1>素质综合测评计算器</h1>
           <p class="sub">依据《学生素质综合测评办法》 · 数据仅保存在本地浏览器</p>
         </div>
       </div>
       <div class="profile">
-        <select id="scheme-select" title="选择测评方案（评分表、基准分随方案切换）">
-          <option value="benbu" selected>温医大本部</option>
-          <option value="renji">仁济学院</option>
-        </select>
+        <div class="seg" id="scheme-select" role="radiogroup" aria-label="选择测评方案（评分表、基准分随方案切换）">
+          <label class="seg-option">
+            <input type="radio" name="scheme" value="benbu">
+            <span>温医大本部</span>
+          </label>
+          <label class="seg-option">
+            <input type="radio" name="scheme" value="renji">
+            <span>仁济学院</span>
+          </label>
+        </div>
         <input type="text" id="profile-name" placeholder="姓名" maxlength="20" title="姓名">
         <input type="text" id="profile-class" placeholder="班级" maxlength="30" title="班级">
         <input type="text" id="profile-id" placeholder="学号" maxlength="20" title="学号">
+        <button class="top-btn" id="btn-open-archive" type="button" title="个人档案卡：建立 / 载入 / 导入">档案卡</button>
       </div>
     </div>
   </header>
@@ -189,6 +196,16 @@
           <li>在校综合测评成绩 = 各学年综合测评成绩的平均值。</li>
         </ul>
       </div>
+
+      <div class="card">
+        <h2>个人档案卡 <span class="tag">建立 / 载入 / 导入</span></h2>
+        <p class="hint">
+          把当前数据（个人信息、测评方案、各学年成绩、班级排名）保存为一张「档案卡」，之后可随时载入或导出；也适合多位同学共用一台设备时分别建档。
+        </p>
+        <div class="manage-actions">
+          <button class="btn" id="btn-manage-archive" type="button">打开档案卡</button>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -257,6 +274,34 @@
       <div class="modal-foot">
         <button class="btn ghost" id="import-modal-cancel" type="button">取消</button>
         <button class="btn" id="import-modal-ok" type="button">解析并导入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 个人档案卡模态框 ============ -->
+  <div class="modal-mask" id="archive-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h3>个人档案卡</h3>
+        <button class="modal-close" id="archive-modal-close" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">
+          把当前数据保存为一张「档案卡」，随时载入（覆盖当前数据）或导出；也可导入他人分享的档案卡 JSON。
+        </p>
+        <div class="archive-bar">
+          <input type="text" id="archive-name" placeholder="档案名称，如：本人 · 大一" maxlength="30">
+          <button class="btn" id="btn-archive-save" type="button">建立档案</button>
+          <label class="btn ghost file-label">
+            导入档案卡文件
+            <input type="file" id="archive-file" accept=".json,application/json" hidden>
+          </label>
+        </div>
+        <div class="archive-list" id="archive-list"></div>
+        <p class="hint archive-msg" id="archive-msg"></p>
+      </div>
+      <div class="modal-foot">
+        <button class="btn ghost" id="archive-modal-cancel" type="button">关闭</button>
       </div>
     </div>
   </div>

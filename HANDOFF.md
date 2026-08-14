@@ -48,7 +48,7 @@ node test/transfer.test.js
 1. **脚本加载顺序敏感**：`index.html` 按 `data.js → calc.js → storage.js → app.js` 顺序加载，依赖全局变量链；`transfer.html` 按 `transfer.js → transfer-app.js`。新增脚本别打乱顺序。
 2. **纯计算层与 DOM 分离**：`calc.js` / `transfer.js` 不碰 DOM，通过 `window.ZCCalc` / `window.ZT` 导出，同时 `module.exports` 供 Node 测试 require——这是双环境复用，**不要在计算层引入 DOM/localStorage**。
 3. **方案切换机制**：`data.js` 里 `SCHEMES` 注册表（`benbu` 本部默认 / `renji` 仁济）+ `setScheme()` 把 `FIVE_GRADE/WEIGHTS/BASE_C1/BASE_C3/CAP/C1_PASS/C2_FAIL_CREDITS/C1_ADD_ITEMS/C1_SUB_ITEMS/C3_CATEGORIES` 挂到全局，`calc.js`、`app.js` 直接引用这些全局名。
-4. **持久化**：单 key `wmu-zongce-v1`（localStorage），模型 `{profile, scheme, years[], classMembers[]}`。转专业页**无任何持久化**。
+4. **持久化**：综测主数据单 key `wmu-zongce-v1`（localStorage），模型 `{profile, scheme, years[], classMembers[]}`；**个人档案卡**另存 key `wmu-zongce-archives-v1`（数组，`ZCArchive` 管理）。转专业页 key `wmu-transfer-v1` 持久化方案/学院/输入。
 
 ## 5. 计算规则速览
 

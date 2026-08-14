@@ -11,17 +11,23 @@
   <header class="topbar">
     <div class="wrap topbar-inner">
       <div class="brand">
-        <img class="logo" src="resource/红色透明底方图.png" alt="温州医科大学校徽">
+        <img class="logo" src="resource/红色透明底长图.png" alt="温州医科大学校徽">
         <div class="brand-titles">
           <h1>转专业考核计算器</h1>
           <p class="sub">本部依据《温州医科大学本科学生转专业管理办法》及各学院实施细则 · 仁济依据2025年转专业通知</p>
         </div>
       </div>
       <div class="profile">
-        <select id="scheme-select" title="选择转专业方案（本部按学院细则，仁济为统一方案）">
-          <option value="benbu" selected>温医大本部</option>
-          <option value="renji">仁济学院</option>
-        </select>
+        <div class="seg" id="scheme-select" role="radiogroup" aria-label="选择转专业方案（本部按学院细则，仁济为统一方案）">
+          <label class="seg-option">
+            <input type="radio" name="scheme" value="benbu">
+            <span>温医大本部</span>
+          </label>
+          <label class="seg-option">
+            <input type="radio" name="scheme" value="renji">
+            <span>仁济学院</span>
+          </label>
+        </div>
         <a class="top-link" href="index.html" title="返回素质综合测评计算器">← 综测计算器</a>
       </div>
     </div>

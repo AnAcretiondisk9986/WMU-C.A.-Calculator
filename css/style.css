@@ -35,14 +35,14 @@ body {
 .topbar { background: linear-gradient(135deg, #1e55c0 0%, #2f6fed 100%); color: #fff; padding: 18px 0; }
 .topbar-inner { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 12px; }
-.brand .logo { height: 44px; width: 44px; flex: none; background: #fff; border-radius: 10px; padding: 4px; object-fit: contain; }
+.brand .logo { height: 48px; width: auto; flex: none; object-fit: contain; background: rgba(255,255,255,.18); border-radius: 10px; padding: 5px 12px; }
 .brand-titles { min-width: 0; }
 .brand h1 { margin: 0; font-size: 22px; letter-spacing: .5px; }
 .brand .sub { margin: 4px 0 0; font-size: 12px; opacity: .85; }
 .profile { display: flex; gap: 8px; flex-wrap: wrap; }
 .profile input {
   border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.15); color: #fff;
-  border-radius: 8px; padding: 6px 10px; font-size: 13px; width: 110px; outline: none;
+  border-radius: 999px; padding: 6px 12px; font-size: 13px; width: 110px; outline: none;
 }
 .profile input::placeholder { color: rgba(255,255,255,.75); }
 .profile input:focus { border-color: #fff; background: rgba(255,255,255,.25); }
@@ -338,6 +338,7 @@ body {
 @media (max-width: 640px) {
   .result-grid { grid-template-columns: repeat(2, 1fr); }
   .topbar-inner { flex-direction: column; align-items: flex-start; }
+  .brand .logo { height: 40px; }
 }
 
 /* ========== 转专业计算器页面 ========== */
@@ -400,4 +401,61 @@ a.tab-btn { text-decoration: none; display: inline-block; }
 @media (max-width: 900px) {
   .input-grid { grid-template-columns: 1fr; }
   .result-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* =========================================================================
+ * 分段单选（本部 / 仁济 方案切换）与 个人档案卡
+ * ========================================================================= */
+.seg {
+  display: inline-flex; align-items: center;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 999px; padding: 3px; gap: 2px;
+}
+.seg-option { position: relative; display: inline-flex; }
+.seg-option input {
+  position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none;
+}
+.seg-option span {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 5px 16px; border-radius: 999px; font-size: 13px; line-height: 1.4;
+  color: rgba(255,255,255,.85); cursor: pointer; white-space: nowrap; user-select: none;
+  transition: color .15s, background .15s, box-shadow .15s;
+}
+.seg-option:hover span { color: #fff; }
+.seg-option input:checked + span {
+  background: #fff; color: var(--primary-dark); font-weight: 700;
+  box-shadow: 0 1px 5px rgba(0,0,0,.2);
+}
+.seg-option input:focus-visible + span { outline: 2px solid #fff; outline-offset: 1px; }
+
+.top-btn {
+  border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.15); color: #fff;
+  border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer;
+  white-space: nowrap; transition: .15s; font-family: inherit; line-height: 1.4;
+}
+.top-btn:hover { background: rgba(255,255,255,.28); border-color: #fff; }
+
+/* 档案卡 */
+.archive-bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 14px; }
+.archive-bar input {
+  flex: 1; min-width: 180px; border: 1px solid var(--line); border-radius: 8px;
+  padding: 7px 10px; font-size: 13px; background: #fff;
+}
+.archive-bar input:focus { outline: none; border-color: var(--primary); }
+.archive-list { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; }
+.archive-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: #fafbfe;
+}
+.archive-item-main { min-width: 0; }
+.archive-item-name { font-weight: 600; font-size: 13.5px; overflow-wrap: anywhere; }
+.archive-item-meta { font-size: 12px; color: var(--text-soft); }
+.archive-item-actions { display: flex; gap: 6px; flex-wrap: wrap; flex: none; }
+.archive-msg { margin-top: 10px; color: var(--ok); }
+.archive-msg.error { color: var(--danger); }
+
+@media (max-width: 640px) {
+  .archive-item { flex-direction: column; align-items: stretch; }
+  .archive-item-actions { justify-content: flex-end; }
 }

@@ -2,7 +2,7 @@
 "use strict";
 
 const assert = require("assert");
-const { ZCStorage, DEFAULT_DATA, normalizeScheme } = require("../js/storage.js");
+const { ZCStorage, ZCArchive, DEFAULT_DATA, normalizeScheme } = require("../js/storage.js");
 
 let passed = 0;
 function t(name, fn) { fn(); passed++; console.log("  ✔ " + name); }
@@ -93,6 +93,53 @@ t("save/load 往返保留 scheme 与 years", () => {
   const d = ZCStorage.load();
   assert.strictEqual(d.scheme, "renji");
   assert.strictEqual(d.years.length, 1);
+});
+
+console.log("— 个人档案卡（ZCArchive） —");
+t("create 建立档案卡并持久化快照", () => {
+  mockLocalStorage();
+  const data = ZCStorage.defaultData();
+  data.profile.name = "张三";
+  data.scheme = "renji";
+  data.years.push({ id: "y1", name: "2024-2025", courses: [{ name: "高数", credit: 4, score: 90 }], c1: { adds: [], subs: [] }, c3: { items: [] } });
+  const { card, overwritten } = ZCArchive.create("本人·大一", data);
+  assert.strictEqual(overwritten, false);
+  assert.strictEqual(card.name, "本人·大一");
+  assert.strictEqual(card.data.profile.name, "张三");
+  assert.strictEqual(card.data.scheme, "renji");
+  assert.strictEqual(card.data.years.length, 1);
+  assert.strictEqual(ZCArchive.list().length, 1);
+});
+t("create 同名覆盖不新增", () => {
+  mockLocalStorage();
+  ZCArchive.create("本人", ZCStorage.defaultData());
+  const res2 = ZCArchive.create("本人", ZCStorage.defaultData());
+  assert.strictEqual(res2.overwritten, true);
+  assert.strictEqual(ZCArchive.list().length, 1);
+});
+t("create 空名抛错", () => {
+  mockLocalStorage();
+  assert.throws(() => ZCArchive.create("  ", ZCStorage.defaultData()));
+});
+t("remove 删除档案卡", () => {
+  mockLocalStorage();
+  const { card } = ZCArchive.create("本人", ZCStorage.defaultData());
+  ZCArchive.remove(card.id);
+  assert.strictEqual(ZCArchive.list().length, 0);
+});
+t("parseCard 支持整张卡与整份主数据", () => {
+  const card = { name: "本人", updatedAt: "2026-08-13", data: { profile: { name: "张三" }, scheme: "renji", years: [], classMembers: [] } };
+  const r1 = ZCArchive.parseCard(JSON.stringify(card));
+  assert.strictEqual(r1.name, "本人");
+  assert.strictEqual(r1.data.scheme, "renji");
+  assert.strictEqual(r1.data.profile.name, "张三");
+  const r2 = ZCArchive.parseCard(JSON.stringify({ profile: { name: "李四" }, scheme: "benbu", years: [] }));
+  assert.strictEqual(r2.name, "李四");
+  assert.strictEqual(r2.data.scheme, "benbu");
+});
+t("parseCard 非法输入抛错", () => {
+  assert.throws(() => ZCArchive.parseCard("{not json"));
+  assert.throws(() => ZCArchive.parseCard("[1,2,3]"));
 });
 
 console.log("\n全部通过：" + passed + " 项");

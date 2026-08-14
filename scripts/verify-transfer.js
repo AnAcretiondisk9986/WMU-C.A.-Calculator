@@ -59,7 +59,7 @@ const { chromium } = require("playwright");
   await page.screenshot({ path: ".reasonix/attachments/verify_transfer_ysg.png", fullPage: true });
 
   // 5. 仁济方案
-  await page.selectOption("#scheme-select", "renji");
+  await page.check('#scheme-select input[value="renji"]');
   await page.fill("#in-total", "120");
   await page.fill("#in-rank", "10");
   await page.fill("#in-interview", "22");
