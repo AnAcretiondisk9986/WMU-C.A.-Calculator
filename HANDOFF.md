@@ -28,19 +28,19 @@ node test/transfer.test.js
 
 ## 3. 目录结构
 
-| 文件 | 职责 |
-|---|---|
-| `index.html` | 综测页面骨架（三个 tab：个人测评 / 班级排名 / 数据管理 + 导入模态框） |
-| `transfer.html` | 转专业考核计算页面 |
-| `css/style.css` | 全部样式 |
-| `js/data.js` | 综测评分表数据（表1~表7、加减分项目、五级换算、两套方案常量） |
-| `js/calc.js` | 综测纯计算逻辑（C1/C2/C3/总分/排名/教务文本解析/体测判定），无 DOM |
-| `js/storage.js` | localStorage 持久化 + JSON 导入导出 |
-| `js/app.js` | 综测交互层（渲染、快选面板、学年管理、导入 UI、班级排名） |
-| `js/transfer.js` | 转专业数据 + 纯计算（本部 13 学院 + 仁济） |
-| `js/transfer-app.js` | 转专业页面交互逻辑 |
-| `test/calc.test.js` | 综测计算层单测（Node） |
-| `test/transfer.test.js` | 转专业计算层单测（Node） |
+| 文件                           | 职责                                        |
+| ---------------------------- | ----------------------------------------- |
+| `index.html`                 | 综测页面骨架（三个 tab：个人测评 / 班级排名 / 数据管理 + 导入模态框） |
+| `transfer.html`              | 转专业考核计算页面                                 |
+| `css/style.css`              | 全部样式                                      |
+| `js/data.js`                 | 综测评分表数据（表1~表7、加减分项目、五级换算、两套方案常量）          |
+| `js/calc.js`                 | 综测纯计算逻辑（C1/C2/C3/总分/排名/教务文本解析/体测判定），无 DOM |
+| `js/storage.js`              | localStorage 持久化 + JSON 导入导出              |
+| `js/app.js`                  | 综测交互层（渲染、快选面板、学年管理、导入 UI、班级排名）            |
+| `js/transfer.js`             | 转专业数据 + 纯计算（本部 13 学院 + 仁济）                |
+| `js/transfer-app.js`         | 转专业页面交互逻辑                                 |
+| `test/calc.test.js`          | 综测计算层单测（Node）                             |
+| `test/transfer.test.js`      | 转专业计算层单测（Node）                            |
 | `scripts/verify-transfer.js` | Playwright 渲染冒烟验证（**可选**，依赖本机 playwright） |
 
 ## 4. 架构要点（改代码前必读）
@@ -54,13 +54,13 @@ node test/transfer.test.js
 
 ### 综测（index.html）
 
-| 部分 | 公式 | 封顶/合格线 |
-|---|---|---|
-| C1 思想品德 | `min(100, 80 + Σ加分 − Σ减分)` | <60 分不合格 |
-| C2 课程成绩 | `Σ(考分×学分) / Σ学分`（学分加权平均） | 不及格学分 ≥20 不合格 |
-| C3 发展素质 | `min(100, 基准分 + Σ加分)`，基准：本部 65 / 仁济 70 | 只加分 |
-| 学年综合 C | `C1×10% + C2×70% + C3×20%` | — |
-| 在校综合 | 各学年 C 的平均值 | — |
+| 部分      | 公式                                     | 封顶/合格线        |
+| ------- | -------------------------------------- | ------------- |
+| C1 思想品德 | `min(100, 80 + Σ加分 − Σ减分)`             | <60 分不合格      |
+| C2 课程成绩 | `Σ(考分×学分) / Σ学分`（学分加权平均）               | 不及格学分 ≥20 不合格 |
+| C3 发展素质 | `min(100, 基准分 + Σ加分)`，基准：本部 65 / 仁济 70 | 只加分           |
+| 学年综合 C  | `C1×10% + C2×70% + C3×20%`             | —             |
+| 在校综合    | 各学年 C 的平均值                             | —             |
 
 - 五级制换算：优=90 / 良=80 / 中=70 / 及格=60 / 不及格=50。
 - 体测降档：总分 ≥80（良好）不降档，<80 降一等级；保健班/保健科证明不降档。
@@ -73,13 +73,13 @@ node test/transfer.test.js
 
 ## 6. 常见改动的落点
 
-| 想改什么 | 改哪里 | 同步改 |
-|---|---|---|
-| 加分细则/分值 | `data.js` 对应方案常量 | `test/calc.test.js` 加用例 |
-| 新增综测学院方案 | ① `data.js` 定义常量 + `SCHEMES` 注册；② `index.html` 下拉加 option；③ `storage.js` scheme 白名单加 key | 测试 |
-| 新增转专业学院 | `transfer.js` 的 `BENBU_COLLEGES` | `test/transfer.test.js` |
-| 计算规则/公式 | `calc.js`（或 `transfer.js`） | 同步更新 `test/*` 与 README 速览表 |
-| UI 样式/交互 | `app.js` / `transfer-app.js` / `css/style.css` | 浏览器手测 |
+| 想改什么     | 改哪里                                                                                      | 同步改                        |
+| -------- | ---------------------------------------------------------------------------------------- | -------------------------- |
+| 加分细则/分值  | `data.js` 对应方案常量                                                                         | `test/calc.test.js` 加用例    |
+| 新增综测学院方案 | ① `data.js` 定义常量 + `SCHEMES` 注册；② `index.html` 下拉加 option；③ `storage.js` scheme 白名单加 key | 测试                         |
+| 新增转专业学院  | `transfer.js` 的 `BENBU_COLLEGES`                                                         | `test/transfer.test.js`    |
+| 计算规则/公式  | `calc.js`（或 `transfer.js`）                                                               | 同步更新 `test/*` 与 README 速览表 |
+| UI 样式/交互 | `app.js` / `transfer-app.js` / `css/style.css`                                           | 浏览器手测                      |
 
 ## 7. 导入功能（三条路径，别混淆）
 
@@ -134,3 +134,9 @@ node test/transfer.test.js  # 转专业计算层，必须全绿
   - `index.html`：C2 卡片新增「直接填写 C2 成绩」输入框，学年概览下方新增「直接填写本学年总分」输入框（静态 DOM，输入不丢焦点）。
   - `app.js`：`newYear()` 初始化新字段；`renderYearOverview()` 手动值标注「手动填写」；`renderC2Stat()` 显示手动 C2；`#c2-manual` / `#total-manual` input 事件写回数据并保存。
   - 清空输入框即恢复自动计算；非法值（非数字/越界）按未填处理；测试 `calc.test.js` 新增 7 个用例。
+
+## 13. 站点迁移到 wmu.clac.acretiondisk.top（2026-02）
+
+- 不蒜子按域名（Referer）分别计数，换域名后新域名的 PV/UV 从零开始，官方不支持跨域名迁移。
+- 旧域名 GitHub Pages（`anacretiondisk9986.github.io/WMU-C-A-Calulator/`）仍在线，旧累计计数仍在不蒜子服务器（迁移时约 148 PV / 39 UV）。
+- 恢复方案：`js/busuanzi-offset.js` 在官方脚本填充当前域名计数后叠加旧域名累计值（`OFFSET_PV`/`OFFSET_UV`），两个页面页脚显示「旧站累计 + 新站新增」的连续数字。更新偏移量：带旧域名 Referer 请求 `https://busuanzi.ibruce.info/busuanzi?jsonpCallback=cb` 即可查询。
