@@ -28,6 +28,16 @@ function convertScore(raw) {
 }
 
 /**
+ * 手动填写分值解析：有效数字（0-100）返回数值，空/非法返回 null。
+ * 用于「直接填写 C2 成绩」与「直接填写学年总分」。
+ */
+function parseManualScore(v) {
+  if (v === undefined || v === null || v === "") return null;
+  const n = Number(v);
+  return (isFinite(n) && n >= 0 && n <= 100) ? n : null;
+}
+
+/**
  * C2 学分加权平均分
  * @param {Array<{name, credit, score, type?}>} courses
  * @param {{excludeOptional?: boolean}} opts excludeOptional=true 时排除 type==='optional'（任意选修课）
@@ -93,18 +103,28 @@ function calcC3(items) {
 
 /**
  * 单学年综合成绩
- * @param {object} year {courses, c1:{adds,subs}, c3:{items}}
- * @returns {{c1, c2, c3, total, c2Failed, hasCourses}} total 无有效课程时为 null
+ * @param {object} year {courses, c1:{adds,subs}, c3:{items}, c2Manual?, totalManual?}
+ *   c2Manual   直接填写的 C2 成绩（0-100，填写后优先于课程计算）
+ *   totalManual 直接填写的学年总分（0-100，填写后优先于公式计算）
+ * @returns {{c1, c2, c3, total, c2Failed, hasCourses, c2Manual, totalManual}}
+ *   total 无有效数据时为 null；c2Manual/totalManual 为解析后的数值或 null
  */
 function calcYear(year) {
   const y = year || {};
   const c1 = calcC1(y.c1 && y.c1.adds, y.c1 && y.c1.subs);
   const c2 = calcC2(y.courses, { excludeOptional: !!y.c2OnlyRequired });
   const c3 = calcC3(y.c3 && y.c3.items);
+  const c2Manual = parseManualScore(y.c2Manual);
+  // 手动填写的 C2 优先于课程计算（creditSum 保持 0，不影响 c2Failed 判定）
+  if (c2Manual !== null) c2.score = round(c2Manual);
   const c2Failed = c2.creditSum > 0 && c2.failCredits >= C2_FAIL_CREDITS;
-  const hasCourses = c2.creditSum > 0;
-  const total = hasCourses ? round(c1.score * WEIGHTS.c1 + c2.score * WEIGHTS.c2 + c3.score * WEIGHTS.c3) : null;
-  return { c1, c2, c3, total, c2Failed, hasCourses };
+  const hasCourses = c2.creditSum > 0 || c2Manual !== null;
+  const totalManual = parseManualScore(y.totalManual);
+  // 手动填写的学年总分优先于公式计算
+  const total = totalManual !== null
+    ? round(totalManual)
+    : (hasCourses ? round(c1.score * WEIGHTS.c1 + c2.score * WEIGHTS.c2 + c3.score * WEIGHTS.c3) : null);
+  return { c1, c2, c3, total, c2Failed, hasCourses, c2Manual, totalManual };
 }
 
 /**
@@ -251,7 +271,7 @@ function rankMembers(members) {
 
 /* 导出到 window（供浏览器端使用），同时兼容 Node 测试 */
 (function expose() {
-  const api = { round, convertScore, calcC2, calcC1, calcC3, calcYear, calcOverall, rankMembers, parseJwText, peVerdict };
+  const api = { round, convertScore, parseManualScore, calcC2, calcC1, calcC3, calcYear, calcOverall, rankMembers, parseJwText, peVerdict };
   if (typeof module !== "undefined" && module.exports) {
     module.exports = api;
   } else if (typeof window !== "undefined") {

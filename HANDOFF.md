@@ -125,3 +125,12 @@ node test/transfer.test.js  # 转专业计算层，必须全绿
 - 转专业页：学院/专业/输入数值持久化到 `wmu-transfer-v1`，刷新不丢；`toMed`/`interviewHint` 去硬编码。
 - 体验/无障碍：课程表与模态框横向滚动、Escape 关闭导入模态框、删除按钮加 `aria-label`、模态框加 `role="dialog" aria-modal`。
 - 测试：新增 `test/storage.test.js`，`calc/transfer` 测试各补边界用例；CI 已加。
+
+## 12. 最近一次落地改动（不蒜子统计 + 手动填写）
+
+- 不蒜子访问统计：`index.html` / `transfer.html` 页脚新增 PV/UV 显示，`<script async src="//busuanzi.ibruce.info/...">` 按域名统计，无需后端。
+- 手动填写 C2 / 学年总分：`year` 数据模型新增 `c2Manual` / `totalManual` 字段（0-100 数值字符串）。
+  - `calc.js`：新增 `parseManualScore()`，`calcYear()` 中手动值**优先于**课程计算/公式计算（`hasCourses` 在手动 C2 时视为 true）。
+  - `index.html`：C2 卡片新增「直接填写 C2 成绩」输入框，学年概览下方新增「直接填写本学年总分」输入框（静态 DOM，输入不丢焦点）。
+  - `app.js`：`newYear()` 初始化新字段；`renderYearOverview()` 手动值标注「手动填写」；`renderC2Stat()` 显示手动 C2；`#c2-manual` / `#total-manual` input 事件写回数据并保存。
+  - 清空输入框即恢复自动计算；非法值（非数字/越界）按未填处理；测试 `calc.test.js` 新增 7 个用例。

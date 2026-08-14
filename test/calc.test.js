@@ -128,6 +128,69 @@ t("在校综合跳过空学年", () => {
   assert.deepStrictEqual(o.totals, [92]);
 });
 
+console.log("— 手动填写（C2 / 学年总分）—");
+t("parseManualScore：有效数字返回数值，空/非法返回 null", () => {
+  assert.strictEqual(C.parseManualScore("85"), 85);
+  assert.strictEqual(C.parseManualScore(90), 90);
+  assert.strictEqual(C.parseManualScore(0), 0);
+  assert.strictEqual(C.parseManualScore(100), 100);
+  assert.strictEqual(C.parseManualScore(""), null);
+  assert.strictEqual(C.parseManualScore(null), null);
+  assert.strictEqual(C.parseManualScore(undefined), null);
+  assert.strictEqual(C.parseManualScore("abc"), null);
+  assert.strictEqual(C.parseManualScore(-1), null);
+  assert.strictEqual(C.parseManualScore(101), null);
+});
+t("空学年 + 手动 C2：total 按 C1×10%+C2×70%+C3×20% 计算", () => {
+  const year = { courses: [], c1: { adds: [], subs: [] }, c3: { items: [] }, c2Manual: "85" };
+  const r = C.calcYear(year);
+  assert.strictEqual(r.c2Manual, 85);
+  assert.strictEqual(r.hasCourses, true);
+  assert.strictEqual(r.total, 80 * 0.1 + 85 * 0.7 + 70 * 0.2); // 81.5
+  assert.strictEqual(r.total, 81.5);
+});
+t("有课程 + 手动 C2：手动值优先于课程计算", () => {
+  const year = {
+    courses: [{ credit: 5, score: 90 }, { credit: 3, score: 80 }], // 课程 C2=86.25
+    c1: { adds: [], subs: [] }, c3: { items: [] }, c2Manual: "80"
+  };
+  const r = C.calcYear(year);
+  assert.strictEqual(r.c2.score, 80);
+  assert.strictEqual(r.total, 80 * 0.1 + 80 * 0.7 + 70 * 0.2);
+});
+t("空学年 + 手动总分：total 直接用手动值", () => {
+  const year = { courses: [], c1: { adds: [], subs: [] }, c3: { items: [] }, totalManual: "88.5" };
+  const r = C.calcYear(year);
+  assert.strictEqual(r.totalManual, 88.5);
+  assert.strictEqual(r.total, 88.5);
+});
+t("手动总分优先于公式计算（即使课程可算）", () => {
+  const year = {
+    courses: [{ credit: 4, score: 100 }], // 公式 C=92
+    c1: { adds: [], subs: [] }, c3: { items: [] }, totalManual: "90"
+  };
+  const r = C.calcYear(year);
+  assert.strictEqual(r.total, 90);
+});
+t("手动总分参与在校平均", () => {
+  const y1 = { courses: [{ credit: 4, score: 100 }], c1: { adds: [], subs: [] }, c3: { items: [] }, totalManual: "90" }; // 手动 90
+  const y2 = { courses: [{ credit: 4, score: 80 }], c1: { adds: [], subs: [] }, c3: { items: [] } };                    // 公式 78
+  const o = C.calcOverall([y1, y2]);
+  assert.strictEqual(o.avg, 84);
+  assert.deepStrictEqual(o.totals, [90, 78]);
+});
+t("手动值清空/非法后回退自动计算", () => {
+  const year = {
+    courses: [{ credit: 4, score: 100 }], // 公式 C=92
+    c1: { adds: [], subs: [] }, c3: { items: [] },
+    c2Manual: "", totalManual: "abc"
+  };
+  const r = C.calcYear(year);
+  assert.strictEqual(r.c2Manual, null);
+  assert.strictEqual(r.totalManual, null);
+  assert.strictEqual(r.total, 92);
+});
+
 console.log("— 班级排名 —");
 t("降序排名 + 并列名次", () => {
   const r = C.rankMembers([

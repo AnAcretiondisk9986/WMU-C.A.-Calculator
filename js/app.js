@@ -45,7 +45,9 @@
       name,
       courses: [],
       c1: { adds: [], subs: [] },
-      c3: { items: [], peScore: "", peHealthClass: false }
+      c3: { items: [], peScore: "", peHealthClass: false },
+      c2Manual: "",
+      totalManual: ""
     };
   }
 
@@ -75,6 +77,9 @@
     const r = ZCCalc.calcYear(year);
     const c1Cls = r.c1.qualified ? "" : "bad";
     const c2Cls = r.c2Failed ? "bad" : "";
+    // 手动填写标注：填写后以手动值为准
+    const c2Manual = r.c2Manual !== null;
+    const totalManual = r.totalManual !== null;
     // 降档标注：体测未达良好且非保健班时，在 C 分数后显示圆角矩形图标
     const peV = ZCCalc.peVerdict(year.c3 && year.c3.peScore, !!(year.c3 && year.c3.peHealthClass));
     const downBadge = peV && peV.down
@@ -89,9 +94,10 @@
       </div>
       <div class="result-item ${c2Cls}">
         <div class="label">课程成绩 C2（70%）</div>
-        <div class="value">${r.c2.creditSum > 0 ? r.c2.score : "—"}</div>
-        <div class="extra">${r.c2.creditSum > 0 ? r.c2.creditSum + " 学分" : "请添加课程"}
-          ${r.c2Failed ? " · 不及格学分≥20，C2不合格" : r.c2.failCount ? " · 有不及格" : ""}</div>
+        <div class="value">${c2Manual ? r.c2.score : (r.c2.creditSum > 0 ? r.c2.score : "—")}</div>
+        <div class="extra">${c2Manual ? "手动填写"
+          : r.c2.creditSum > 0 ? r.c2.creditSum + " 学分" : "请添加课程或直接填写 C2"}
+          ${r.c2Failed ? " · 不及格学分≥20，C2不合格" : (!c2Manual && r.c2.failCount ? " · 有不及格" : "")}</div>
       </div>
       <div class="result-item">
         <div class="label">发展素质 C3（20%）</div>
@@ -101,8 +107,11 @@
       <div class="result-item total">
         <div class="label">学年综合成绩 C</div>
         <div class="value">${r.total === null ? "—" : r.total}${downBadge}</div>
-        <div class="extra">C1×10% + C2×70% + C3×20%</div>
+        <div class="extra">${totalManual ? "手动填写" : "C1×10% + C2×70% + C3×20%"}</div>
       </div>`;
+    // 同步手动填写输入框（不重建 DOM，避免输入时丢失焦点）
+    const tm = $("#total-manual");
+    if (tm) tm.value = year.totalManual || "";
   }
 
   function renderC1() {
@@ -136,23 +145,26 @@
     if (!year) return;
     const stat = $("#c2-stat");
     const r = ZCCalc.calcC2(year.courses, { excludeOptional: !!year.c2OnlyRequired });
+    const manual = ZCCalc.parseManualScore(year.c2Manual);
+    const parts = [];
+    if (manual !== null) parts.push(`手动填写 C2 成绩 <b>${manual}</b>`);
     if (year.courses.length) {
-      const parts = [`学分加权平均分 <b>${r.creditSum > 0 ? r.score : "—"}</b>`];
+      parts.push(`学分加权平均分 <b>${r.creditSum > 0 ? r.score : "—"}</b>`);
       parts.push(`总学分 ${r.creditSum}`);
       if (r.excludedCount) parts.push(`<span style="color:var(--text-soft)">已排除 ${r.excludedCount} 门任意选修课</span>`);
       if (r.invalidCount) parts.push(`<span style="color:var(--warn)">${r.invalidCount} 行成绩未填写/无效</span>`);
       if (r.failCount) parts.push(`<span style="color:var(--danger)">${r.failCount} 门不及格（${r.failCredits} 学分）</span>`);
       if (r.failCredits >= C2_FAIL_CREDITS) parts.push(`<span style="color:var(--danger)"><b>不及格学分≥20，课程学习成绩不合格</b></span>`);
-      stat.innerHTML = parts.join(" · ");
-    } else {
-      stat.innerHTML = "";
     }
+    stat.innerHTML = parts.join(" · ");
   }
 
   function renderC2() {
     const year = getCurrentYear();
     if (!year) return;
     const body = $("#course-body");
+    const cm = $("#c2-manual");
+    if (cm) cm.value = year.c2Manual || "";
     if (!year.courses.length) {
       body.innerHTML = '<tr><td colspan="6"><div class="empty-hint">暂无课程，点击下方按钮添加，或从教务系统复制成绩表一键导入</div></td></tr>';
     } else {
@@ -782,6 +794,25 @@
       save();
       renderYearOverview();
       renderC2Stat();
+    });
+
+    // 直接填写 C2 成绩（填写后以手动值为准，清空恢复课程计算）
+    $("#c2-manual").addEventListener("input", (e) => {
+      const year = getCurrentYear();
+      if (!year) return;
+      year.c2Manual = e.target.value;
+      save();
+      renderYearOverview();
+      renderC2Stat();
+    });
+
+    // 直接填写本学年总分（填写后以手动值为准，清空恢复公式计算）
+    $("#total-manual").addEventListener("input", (e) => {
+      const year = getCurrentYear();
+      if (!year) return;
+      year.totalManual = e.target.value;
+      save();
+      renderYearOverview();
     });
 
     // 豆包批量导入：提示词查看与一键复制

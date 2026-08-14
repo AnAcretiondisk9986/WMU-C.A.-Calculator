@@ -352,6 +352,20 @@ body {
 .footer .site-stat { margin-top: 4px; }
 .footer .site-stat span { color: var(--primary); font-weight: 600; }
 
+/* 手动填写：C2 成绩 / 学年总分 */
+.manual-row {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin: 8px 0; padding: 6px 10px; background: #f7f9fd;
+  border: 1px dashed var(--line); border-radius: 8px; font-size: 12.5px;
+}
+.manual-row label { color: var(--text); font-weight: 600; white-space: nowrap; }
+.manual-row input[type="number"] {
+  width: 90px; border: 1px solid var(--line); border-radius: 6px;
+  padding: 4px 8px; font-size: 13px;
+}
+.manual-row input[type="number"]:focus { outline: none; border-color: var(--primary); }
+.manual-row .hint { color: var(--text-soft); }
+
 /* 空状态 */
 .empty-hint { color: var(--text-soft); font-size: 12.5px; font-style: italic; }
 
