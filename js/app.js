@@ -124,7 +124,7 @@
       <div class="item-row ${minus ? "minus" : ""}">
         <span class="item-name">${esc(it.name)}</span>
         <span class="item-points">${minus ? "−" : "+"}${Math.abs(it.points)}</span>
-        <button class="del" data-list="${listKey}" data-idx="${adds.indexOf(it) >= 0 ? adds.indexOf(it) : subs.indexOf(it)}" title="删除" aria-label="删除">×</button>
+        <button class="del icon-btn" data-list="${listKey}" data-idx="${adds.indexOf(it) >= 0 ? adds.indexOf(it) : subs.indexOf(it)}" title="删除" aria-label="删除"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       </div>`;
 
     const addList = $("#c1-add-list");
@@ -193,7 +193,7 @@
           </td>
           <td class="num"><input data-field="credit" type="number" min="0" step="0.5" value="${c.credit ?? ""}" placeholder="学分"></td>
           <td class="num"><input data-field="score" value="${esc(c.score)}" ${scoreAttrs} maxlength="10"></td>
-          <td class="op"><button class="del" data-action="del-course" data-idx="${i}" title="删除" aria-label="删除">×</button></td>
+          <td class="op"><button class="del icon-btn" data-action="del-course" data-idx="${i}" title="删除" aria-label="删除"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></td>
         </tr>`;
       }).join("");
     }
@@ -253,7 +253,7 @@
             <div class="item-row">
               <span class="item-name">${esc(it.name)}</span>
               <span class="item-points">+${it.points}</span>
-              <button class="del" data-list="c3_${cat.key}" data-idx="${i}" title="删除" aria-label="删除">×</button>
+              <button class="del icon-btn" data-list="c3_${cat.key}" data-idx="${i}" title="删除" aria-label="删除"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
             </div>`).join("")
         : '<div class="empty-hint">暂无条目</div>';
       return `
@@ -307,7 +307,7 @@
         <td class="num">${m.rank <= 3 ? `<span class="rank-top r${m.rank}">${m.rank}</span>` : m.rank}</td>
         <td>${esc(m.name)}${m.name === myName ? ' <span class="tag" style="font-size:10px">我</span>' : ""}</td>
         <td class="num">${m.total}</td>
-        <td class="op"><button class="del" data-action="del-rank" data-idx="${i}" title="删除" aria-label="删除">×</button></td>
+        <td class="op"><button class="del icon-btn" data-action="del-rank" data-idx="${i}" title="删除" aria-label="删除"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></td>
       </tr>`).join("") : "";
   }
 

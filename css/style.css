@@ -2,6 +2,49 @@
  * style.css — 素质综合测评计算器
  * ========================================================================= */
 
+@font-face {
+  font-family: "HarmonyOS Sans SC";
+  src: url("../fonts/HarmonyOS Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Thin.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+}
+@font-face {
+  font-family: "HarmonyOS Sans SC";
+  src: url("../fonts/HarmonyOS Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Light.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: "HarmonyOS Sans SC";
+  src: url("../fonts/HarmonyOS Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "HarmonyOS Sans SC";
+  src: url("../fonts/HarmonyOS Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "HarmonyOS Sans SC";
+  src: url("../fonts/HarmonyOS Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "HarmonyOS Sans SC";
+  src: url("../fonts/HarmonyOS Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Black.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+}
+
 :root {
   --primary: #2f6fed;
   --primary-dark: #1e55c0;
@@ -19,27 +62,42 @@
 
 * { box-sizing: border-box; }
 
+button, input, select, textarea { font: inherit; }
+
 html, body { margin: 0; padding: 0; }
 
 body {
-  font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family: "HarmonyOS Sans SC", "HarmonyOS Sans", "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
   background: var(--bg);
   color: var(--text);
   font-size: 14px;
   line-height: 1.6;
+  font-weight: 400;
 }
 
 .wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
 
-/* ---------- 顶栏 ---------- */
-.topbar { background: linear-gradient(135deg, #1e55c0 0%, #2f6fed 100%); color: #fff; padding: 18px 0; }
-.topbar-inner { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-.brand { display: flex; align-items: center; gap: 12px; }
-.brand .logo { height: 48px; width: auto; flex: none; object-fit: contain; background: rgba(255,255,255,.18); border-radius: 10px; padding: 5px 12px; }
-.brand-titles { min-width: 0; }
-.brand h1 { margin: 0; font-size: 22px; letter-spacing: .5px; }
-.brand .sub { margin: 4px 0 0; font-size: 12px; opacity: .85; }
-.profile { display: flex; gap: 8px; flex-wrap: wrap; }
+/* ---------- 顶部校园横幅 ---------- */
+.topbar {
+  position: relative;
+  min-height: 188px;
+  color: #fff;
+  padding: 24px 0 26px;
+  overflow: hidden;
+  background-image:
+    linear-gradient(90deg, rgba(7, 24, 44, .88) 0%, rgba(7, 24, 44, .68) 38%, rgba(7, 24, 44, .22) 76%, rgba(7, 24, 44, .14) 100%),
+    linear-gradient(180deg, rgba(7, 24, 44, .32) 0%, rgba(7, 24, 44, .08) 48%, rgba(7, 24, 44, .3) 100%),
+    url("../resource/benbu.jpg");
+  background-size: cover;
+  background-position: center 56%;
+}
+.topbar-inner { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 14px; min-width: min(100%, 460px); }
+.brand .logo { height: 52px; width: auto; flex: none; object-fit: contain; background: rgba(255,255,255,.92); border: 1px solid rgba(255,255,255,.92); border-radius: 10px; padding: 6px 12px; box-shadow: 0 8px 24px rgba(0,0,0,.16); }
+.brand-titles { min-width: 0; padding: 10px 14px 11px; border: 1px solid rgba(255,255,255,.22); border-radius: 12px; background: rgba(5, 21, 40, .48); box-shadow: 0 8px 24px rgba(0,0,0,.12); backdrop-filter: blur(6px); }
+.brand h1 { margin: 0; font-size: 23px; line-height: 1.25; letter-spacing: 0; font-weight: 700; text-shadow: 0 2px 12px rgba(0,0,0,.28); }
+.brand .sub { margin: 5px 0 0; font-size: 12px; line-height: 1.5; color: rgba(255,255,255,.86); }
+.profile { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; padding: 9px; border: 1px solid rgba(255,255,255,.22); border-radius: 14px; background: rgba(5, 21, 40, .46); box-shadow: 0 8px 24px rgba(0,0,0,.12); backdrop-filter: blur(6px); }
 .profile input {
   border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.15); color: #fff;
   border-radius: 999px; padding: 6px 12px; font-size: 13px; width: 110px; outline: none;
@@ -351,6 +409,9 @@ body {
 .footer { text-align: center; color: var(--text-soft); font-size: 12px; padding: 8px 16px 24px; }
 .footer .site-stat { margin-top: 4px; }
 .footer .site-stat span { color: var(--primary); font-weight: 600; }
+.project-links { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; margin: 6px 0 0; }
+.project-links a { display: inline-flex; align-items: center; gap: 5px; color: var(--text-soft); text-decoration: none; font-weight: 500; }
+.project-links a:hover { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
 
 /* 手动填写：C2 成绩 / 学年总分 */
 .manual-row {
@@ -371,8 +432,14 @@ body {
 
 @media (max-width: 640px) {
   .result-grid { grid-template-columns: repeat(2, 1fr); }
-  .topbar-inner { flex-direction: column; align-items: flex-start; }
-  .brand .logo { height: 40px; }
+  .topbar { min-height: 286px; padding: 20px 0 22px; background-position: 58% center; }
+  .topbar-inner { flex-direction: column; align-items: stretch; }
+  .brand { min-width: 0; align-items: flex-start; }
+  .brand .logo { height: 42px; padding: 5px 9px; }
+  .brand h1 { font-size: 20px; }
+  .brand-titles { flex: 1; }
+  .profile { justify-content: flex-start; }
+  .profile input { flex: 1 1 90px; min-width: 0; }
 }
 
 /* ========== 转专业计算器页面 ========== */
@@ -385,6 +452,10 @@ a.tab-btn { text-decoration: none; display: inline-block; }
   display: inline-flex; align-items: center; white-space: nowrap;
 }
 .top-link:hover { background: rgba(255,255,255,.25); border-color: #fff; }
+
+.icon { width: 1em; height: 1em; flex: none; display: inline-block; vertical-align: -.14em; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.icon-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.modal-close .icon, .del .icon { width: 1.05em; height: 1.05em; }
 
 .inline-fields { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-start; }
 .inline-fields .field { flex: 1; min-width: 130px; }

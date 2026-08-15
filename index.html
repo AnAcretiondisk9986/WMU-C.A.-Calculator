@@ -40,7 +40,10 @@
     <button class="tab-btn active" data-tab="assess">个人测评</button>
     <button class="tab-btn" data-tab="rank">班级排名</button>
     <button class="tab-btn" data-tab="manage">数据管理</button>
-    <a class="tab-btn" href="transfer.html" title="转专业考核计算器（本部各学院 / 仁济学院）">转专业计算 ↗</a>
+    <a class="tab-btn icon-btn" href="transfer.html" title="转专业考核计算器（本部各学院 / 仁济学院）">
+      转专业计算
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"/><path d="M13 11l6-6"/><path d="M19 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h4"/></svg>
+    </a>
   </nav>
 
   <main class="wrap">
@@ -224,7 +227,7 @@
     <div class="modal" role="dialog" aria-modal="true">
       <div class="modal-head">
         <h3 id="quick-modal-title">按评分表快捷添加</h3>
-        <button class="modal-close" id="quick-modal-close" type="button" aria-label="关闭">×</button>
+        <button class="modal-close icon-btn" id="quick-modal-close" type="button" aria-label="关闭"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       </div>
       <div class="modal-body" id="quick-modal-body"></div>
       <div class="modal-foot">
@@ -238,7 +241,7 @@
     <div class="modal small" role="dialog" aria-modal="true">
       <div class="modal-head">
         <h3 id="custom-modal-title">自定义条目</h3>
-        <button class="modal-close" id="custom-modal-close" type="button" aria-label="关闭">×</button>
+        <button class="modal-close icon-btn" id="custom-modal-close" type="button" aria-label="关闭"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       </div>
       <div class="modal-body">
         <label class="field">
@@ -271,7 +274,7 @@
     <div class="modal" role="dialog" aria-modal="true">
       <div class="modal-head">
         <h3>从教务系统导入课程</h3>
-        <button class="modal-close" id="import-modal-close" type="button" aria-label="关闭">×</button>
+        <button class="modal-close icon-btn" id="import-modal-close" type="button" aria-label="关闭"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       </div>
       <div class="modal-body">
         <p class="hint">
@@ -293,7 +296,7 @@
     <div class="modal" role="dialog" aria-modal="true">
       <div class="modal-head">
         <h3>个人档案卡</h3>
-        <button class="modal-close" id="archive-modal-close" type="button" aria-label="关闭">×</button>
+        <button class="modal-close icon-btn" id="archive-modal-close" type="button" aria-label="关闭"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       </div>
       <div class="modal-body">
         <p class="hint">
@@ -321,6 +324,16 @@
   <footer class="wrap footer">
     <p>仅供学生自评参考，测评结果以班级测评小组、系及学院认定为准。</p>
     <p class="site-stat">本站总访问量 <span id="busuanzi_value_site_pv">…</span> 次 · 访客数 <span id="busuanzi_value_site_uv">…</span> 人</p>
+    <p class="project-links">
+      <a href="https://github.com/AnAcretiondisk9986/WMU-C.A.-Calculator" target="_blank" rel="noopener noreferrer">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M8 9l-2 3 2 3M16 9l2 3-2 3M14 7l-4 10"/></svg>
+        GitHub 仓库
+      </a>
+      <a href="https://acretiondisk.top/" target="_blank" rel="noopener noreferrer">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+        Acretiondisk.top
+      </a>
+    </p>
   </footer>
 
   <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
