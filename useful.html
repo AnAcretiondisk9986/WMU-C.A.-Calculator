@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="温州医科大学校园服务、学院门户与常用学习平台导航。">
+  <title>实用网站 · WMU综测转专业计算器</title>
+  <link rel="icon" href="resource/红色透明底方图.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="useful-page">
+  <header class="topbar useful-topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand">
+        <img class="logo" src="resource/红色透明底长图.png" alt="温州医科大学校徽">
+        <div class="brand-titles">
+          <h1>实用网站</h1>
+          <p class="sub">校园服务、学院门户与常用学习平台</p>
+        </div>
+      </div>
+      <nav class="profile useful-top-actions" aria-label="计算工具导航">
+        <a class="top-link icon-btn" href="index.html">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5z"/><path d="M8 15l2-2 2 1 4-5"/></svg>
+          综测计算器
+        </a>
+        <a class="top-link icon-btn" href="transfer.html">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/><path d="m18 7-3 3M6 17l3-3"/></svg>
+          转专业计算
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap useful-main">
+    <section class="useful-intro" aria-labelledby="useful-heading">
+      <div>
+        <p class="useful-eyebrow">WMU DIRECTORY</p>
+        <h2 id="useful-heading">常用入口，一处直达</h2>
+        <p>汇集校内服务、学院门户和学习平台。</p>
+      </div>
+      <div class="site-search-wrap">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/><path d="m16 16 5 5"/></svg>
+        <label class="sr-only" for="site-search">搜索网站</label>
+        <input id="site-search" type="search" placeholder="搜索网站、用途或域名" autocomplete="off">
+        <button id="site-search-clear" class="site-search-clear icon-btn" type="button" aria-label="清空搜索" hidden>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <div class="site-toolbar">
+      <nav class="site-filters" id="site-filters" aria-label="网站分类"></nav>
+      <p class="site-status" id="site-status" aria-live="polite"></p>
+    </div>
+
+    <div id="site-groups"></div>
+    <noscript><p class="card">请启用 JavaScript 以显示网站列表。</p></noscript>
+  </main>
+
+  <footer class="wrap footer">
+    <p>网站入口可能随学校系统调整，如遇失效请以学校最新通知为准。</p>
+    <p class="project-links">
+      <a href="https://github.com/AnAcretiondisk9986/WMU-C.A.-Calculator" target="_blank" rel="noopener noreferrer">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M8 9l-2 3 2 3M16 9l2 3-2 3M14 7l-4 10"/></svg>
+        GitHub 仓库
+      </a>
+      <a href="https://acretiondisk.top/" target="_blank" rel="noopener noreferrer">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+        Acretiondisk.top
+      </a>
+    </p>
+  </footer>
+
+  <script src="js/useful-sites-data.js"></script>
+  <script src="js/useful-sites.js"></script>
+</body>
+</html>
