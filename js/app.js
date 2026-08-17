@@ -297,20 +297,6 @@
       </div>`;
   }
 
-  function renderRank() {
-    const body = $("#rank-body");
-    const ranked = ZCCalc.rankMembers(state.classMembers);
-    const myName = (state.profile.name || "").trim();
-    $("#rank-empty").style.display = ranked.length ? "none" : "";
-    body.innerHTML = ranked.length ? ranked.map((m, i) => `
-      <tr class="${m.name === myName ? "me" : ""}">
-        <td class="num">${m.rank <= 3 ? `<span class="rank-top r${m.rank}">${m.rank}</span>` : m.rank}</td>
-        <td>${esc(m.name)}${m.name === myName ? ' <span class="tag" style="font-size:10px">我</span>' : ""}</td>
-        <td class="num">${m.total}</td>
-        <td class="op"><button class="del icon-btn" data-action="del-rank" data-idx="${i}" title="删除" aria-label="删除"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></td>
-      </tr>`).join("") : "";
-  }
-
   function renderSchemeSelect() {
     const key = getSchemeKey();
     $$('#scheme-select input[type="radio"][name="scheme"]').forEach((inp) => {
@@ -328,7 +314,6 @@
     renderC2();
     renderC3();
     renderOverall();
-    renderRank();
   }
 
   /* 按快选目标返回对应评分表数据（兼容双方案：C1_* 与 C3_CATEGORIES 为全局，随方案切换） */
@@ -698,7 +683,6 @@
       $("#profile-" + f).addEventListener("input", (e) => {
         state.profile[f === "class" ? "className" : f === "id" ? "studentId" : "name"] = e.target.value;
         save();
-        renderRank();
       });
     });
 
@@ -951,38 +935,6 @@
     $("#custom-points").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#custom-modal-ok").click(); });
     $("#custom-name").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#custom-modal-ok").click(); });
 
-    // 班级排名
-    $("#btn-rank-add").addEventListener("click", addRankMember);
-    $("#rank-name").addEventListener("keydown", (e) => { if (e.key === "Enter") addRankMember(); });
-    $("#rank-total").addEventListener("keydown", (e) => { if (e.key === "Enter") addRankMember(); });
-    $("#btn-rank-me").addEventListener("click", () => {
-      const year = getCurrentYear();
-      const name = (state.profile.name || "").trim();
-      if (!year) { alert("请先录入学年数据"); return; }
-      if (!name) { alert("请先在右上角填写姓名"); return; }
-      const total = ZCCalc.calcYear(year).total;
-      if (total === null) { alert("当前学年尚无有效课程成绩，无法计算总分"); return; }
-      // 若已存在同名则更新
-      const idx = state.classMembers.findIndex((m) => m.name === name);
-      if (idx >= 0) state.classMembers[idx].total = total;
-      else state.classMembers.push({ name, total });
-      save();
-      renderRank();
-    });
-    $("#btn-rank-clear").addEventListener("click", () => {
-      if (!confirm("确定清空全部班级成员吗？")) return;
-      state.classMembers = [];
-      save();
-      renderRank();
-    });
-    $("#rank-body").addEventListener("click", (e) => {
-      const btn = e.target.closest('[data-action="del-rank"]');
-      if (!btn) return;
-      state.classMembers.splice(Number(btn.dataset.idx), 1);
-      save();
-      renderRank();
-    });
-
     // 数据管理
     $("#btn-export").addEventListener("click", () => ZCStorage.exportJSON(state));
     $("#import-file").addEventListener("change", async (e) => {
@@ -996,7 +948,7 @@
         currentYearId = state.years.length ? state.years[0].id : null;
         save();
         renderAll();
-        msg.textContent = `导入成功：${state.years.length} 个学年、${state.classMembers.length} 名班级成员。`;
+        msg.textContent = `导入成功：${state.years.length} 个学年。`;
         msg.classList.remove("error");
       } catch (err) {
         msg.textContent = "导入失败：" + (err && err.message ? err.message : "文件格式错误");
@@ -1041,21 +993,6 @@
         if (!$("#archive-modal").hidden) closeArchiveModal();
       }
     });
-  }
-
-  function addRankMember() {
-    const name = $("#rank-name").value.trim();
-    const total = Number($("#rank-total").value);
-    if (!name) { alert("请填写姓名"); return; }
-    if (!isFinite(total)) { alert("请填写有效总分"); return; }
-    const idx = state.classMembers.findIndex((m) => m.name === name);
-    if (idx >= 0) state.classMembers[idx].total = total;
-    else state.classMembers.push({ name, total });
-    $("#rank-name").value = "";
-    $("#rank-total").value = "";
-    save();
-    renderRank();
-    $("#rank-name").focus();
   }
 
   /* ---------------- 启动 ---------------- */

@@ -2,9 +2,8 @@
  * storage.js — localStorage 持久化 + JSON 导入/导出
  * 数据模型：
  *   {
- *     profile: { name, className, studentId },     // 个人信息（用于班级排名展示）
- *     years: [ { id, name, courses[], c1:{adds,subs}, c3:{items} } ],
- *     classMembers: [ { name, total } ]             // 班级排名：姓名+总分
+ *     profile: { name, className, studentId },
+ *     years: [ { id, name, courses[], c1:{adds,subs}, c3:{items} } ]
  *   }
  * ========================================================================= */
 
@@ -18,8 +17,7 @@ const DEFAULT_DATA = {
   version: 1,             // 数据模型版本（供未来迁移）
   profile: { name: "", className: "", studentId: "" },
   scheme: "benbu",        // 测评方案：benbu 温医大本部（默认）/ renji 仁济学院
-  years: [],
-  classMembers: []
+  years: []
 };
 
 /** scheme 白名单校验，非法回退默认方案（load 与 import 共用） */
@@ -42,8 +40,7 @@ const ZCStorage = {
         version: Number.isInteger(data.version) ? data.version : DEFAULT_DATA.version,
         profile: Object.assign({}, DEFAULT_DATA.profile, data.profile || {}),
         scheme: normalizeScheme(data.scheme),
-        years: Array.isArray(data.years) ? data.years : [],
-        classMembers: Array.isArray(data.classMembers) ? data.classMembers : []
+        years: Array.isArray(data.years) ? data.years : []
       };
     } catch (e) {
       console.warn("读取本地数据失败，使用空数据", e);
@@ -83,8 +80,7 @@ const ZCStorage = {
       version: Number.isInteger(data.version) ? data.version : DEFAULT_DATA.version,
       profile: Object.assign({}, DEFAULT_DATA.profile, data.profile || {}),
       scheme: normalizeScheme(data.scheme),
-      years: Array.isArray(data.years) ? data.years : [],
-      classMembers: Array.isArray(data.classMembers) ? data.classMembers : []
+      years: Array.isArray(data.years) ? data.years : []
     };
     return out;
   },
@@ -109,7 +105,7 @@ const ZCStorage = {
 /* =========================================================================
  * ZCArchive — 个人档案卡（多档案）：建立 / 载入 / 导入 / 导出
  * 每张档案卡 { id, name, updatedAt, data }，其中 data 与主数据同构
- * （profile / scheme / years / classMembers / version）。
+ * （profile / scheme / years / version）。
  * 独立存储于 ARCHIVE_KEY，便于多位同学或不同阶段分别建档。
  * ========================================================================= */
 
@@ -135,14 +131,13 @@ const ZCArchive = {
     }
   },
 
-  /** 规范化一份主数据为档案卡快照（profile 深拷贝，years/classMembers 保持原引用） */
+  /** 规范化一份主数据为档案卡快照（profile 深拷贝，years 保持原引用） */
   _snapshot(data) {
     return {
       version: (data && Number.isInteger(data.version)) ? data.version : DEFAULT_DATA.version,
       profile: Object.assign({}, DEFAULT_DATA.profile, (data && data.profile) || {}),
       scheme: normalizeScheme(data && data.scheme),
-      years: Array.isArray(data && data.years) ? data.years : [],
-      classMembers: Array.isArray(data && data.classMembers) ? data.classMembers : []
+      years: Array.isArray(data && data.years) ? data.years : []
     };
   },
 

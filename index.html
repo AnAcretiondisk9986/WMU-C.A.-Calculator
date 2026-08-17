@@ -38,7 +38,6 @@
 
   <nav class="tabs wrap">
     <button class="tab-btn active" data-tab="assess">个人测评</button>
-    <button class="tab-btn" data-tab="rank">班级排名</button>
     <button class="tab-btn" data-tab="manage">数据管理</button>
     <a class="tab-btn icon-btn tabs-spacer" href="transfer.html" title="转专业考核计算器（本部各学院 / 仁济学院）">
       转专业计算
@@ -163,32 +162,7 @@
       </div>
     </section>
 
-    <!-- ============ Tab 2 班级排名 ============ -->
-    <section id="tab-rank" class="tab-pane">
-      <div class="card">
-        <h2>班级测评排名（简易版）</h2>
-        <p class="hint">
-          录入本班同学姓名与综合测评总分（或从"个人测评"当前学年总分一键带入本人成绩），自动按总分降序排出名次，相同分数并列。
-          计算总分的方法：C = C1×10% + C2×70% + C3×20%，见"个人测评"页。
-        </p>
-        <div class="rank-form">
-          <input type="text" id="rank-name" placeholder="姓名" maxlength="20">
-          <input type="number" id="rank-total" placeholder="综合总分（如 85.6）" min="0" max="100" step="0.1">
-          <button class="btn" id="btn-rank-add" type="button">添加</button>
-          <button class="btn ghost" id="btn-rank-me" type="button">带入我的当前学年成绩</button>
-          <button class="btn danger ghost" id="btn-rank-clear" type="button">清空</button>
-        </div>
-        <table class="rank-table">
-          <thead>
-            <tr><th class="num">名次</th><th>姓名</th><th class="num">总分</th><th class="op"></th></tr>
-          </thead>
-          <tbody id="rank-body"></tbody>
-        </table>
-        <p class="hint" id="rank-empty">暂无成员，请先添加。</p>
-      </div>
-    </section>
-
-    <!-- ============ Tab 3 数据管理 ============ -->
+    <!-- ============ Tab 2 数据管理 ============ -->
     <section id="tab-manage" class="tab-pane">
       <div class="card">
         <h2>数据管理</h2>
@@ -217,7 +191,7 @@
       <div class="card">
         <h2>个人档案卡 <span class="tag">建立 / 载入 / 导入</span></h2>
         <p class="hint">
-          把当前数据（个人信息、测评方案、各学年成绩、班级排名）保存为一张「档案卡」，之后可随时载入或导出；也适合多位同学共用一台设备时分别建档。
+          把当前数据（个人信息、测评方案、各学年成绩）保存为一张「档案卡」，之后可随时载入或导出；也适合多位同学共用一台设备时分别建档。
         </p>
         <div class="manage-actions">
           <button class="btn" id="btn-manage-archive" type="button">打开档案卡</button>

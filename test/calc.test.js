@@ -191,18 +191,6 @@ t("手动值清空/非法后回退自动计算", () => {
   assert.strictEqual(r.total, 92);
 });
 
-console.log("— 班级排名 —");
-t("降序排名 + 并列名次", () => {
-  const r = C.rankMembers([
-    { name: "甲", total: 90 },
-    { name: "乙", total: 85.5 },
-    { name: "丙", total: 85.5 },
-    { name: "丁", total: 80 }
-  ]);
-  assert.deepStrictEqual(r.map(x => x.name), ["甲", "乙", "丙", "丁"]);
-  assert.deepStrictEqual(r.map(x => x.rank), [1, 2, 2, 4]);
-});
-
 console.log("— 教务系统导入解析 —");
 const JW_SAMPLE = [
   "课程代码\t课程名称\t课程性质\t学分\t成绩\t绩点",

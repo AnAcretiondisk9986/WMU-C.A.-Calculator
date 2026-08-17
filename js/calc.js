@@ -251,27 +251,9 @@ function peVerdict(score, isHealthClass) {
   return { down: true, kind: "below" };
 }
 
-/**
- * 班级排名：对每人每学年（或在校平均）总分排序
- * @param {Array<{name, yearTotals: {[yearKey]: number}|number, overall?: number}>} members
- * @returns 排序后的 [{name, total, rank}]
- */
-function rankMembers(members) {
-  const list = (Array.isArray(members) ? members : [])
-    .filter(m => m && m.name)
-    .map(m => ({ name: m.name, total: round(m.total) }));
-  list.sort((a, b) => b.total - a.total);
-  let prev = null, prevRank = 0;
-  return list.map((m, i) => {
-    const rank = (prev !== null && Math.abs(m.total - prev) < 1e-9) ? prevRank : i + 1;
-    prev = m.total; prevRank = rank;
-    return { ...m, rank };
-  });
-}
-
 /* 导出到 window（供浏览器端使用），同时兼容 Node 测试 */
 (function expose() {
-  const api = { round, convertScore, parseManualScore, calcC2, calcC1, calcC3, calcYear, calcOverall, rankMembers, parseJwText, peVerdict };
+  const api = { round, convertScore, parseManualScore, calcC2, calcC1, calcC3, calcYear, calcOverall, parseJwText, peVerdict };
   if (typeof module !== "undefined" && module.exports) {
     module.exports = api;
   } else if (typeof window !== "undefined") {

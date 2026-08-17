@@ -128,7 +128,7 @@ t("remove 删除档案卡", () => {
   assert.strictEqual(ZCArchive.list().length, 0);
 });
 t("parseCard 支持整张卡与整份主数据", () => {
-  const card = { name: "本人", updatedAt: "2026-08-13", data: { profile: { name: "张三" }, scheme: "renji", years: [], classMembers: [] } };
+  const card = { name: "本人", updatedAt: "2026-08-13", data: { profile: { name: "张三" }, scheme: "renji", years: [] } };
   const r1 = ZCArchive.parseCard(JSON.stringify(card));
   assert.strictEqual(r1.name, "本人");
   assert.strictEqual(r1.data.scheme, "renji");

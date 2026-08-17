@@ -334,24 +334,6 @@ body {
 }
 .overall-avg .avg-value { font-size: 22px; font-weight: 800; color: var(--primary); }
 
-/* ---------- 班级排名 ---------- */
-.rank-form { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 14px; }
-.rank-form input {
-  border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 13px; width: 160px;
-}
-.rank-form input:focus { outline: none; border-color: var(--primary); }
-.rank-table { width: 100%; border-collapse: collapse; }
-.rank-table th, .rank-table td { border-bottom: 1px solid var(--line); padding: 7px 10px; text-align: left; }
-.rank-table th { color: var(--text-soft); font-size: 12.5px; }
-.rank-table td.num, .rank-table th.num { width: 90px; }
-.rank-table td.op, .rank-table th.op { width: 50px; text-align: center; }
-.rank-table tr.me td { background: #eef5ff; }
-.rank-top { display: inline-flex; width: 22px; height: 22px; align-items: center; justify-content: center;
-  border-radius: 50%; font-size: 12px; font-weight: 700; color: #fff; background: #9ca3af; }
-.rank-top.r1 { background: #e6a23c; }
-.rank-top.r2 { background: #a8b3c4; }
-.rank-top.r3 { background: #c98a5e; }
-
 /* ---------- 数据管理 ---------- */
 .manage-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
 .file-label { display: inline-block; cursor: pointer; }
