@@ -92,6 +92,16 @@ body {
   background-position: center 56%;
 }
 .topbar-inner { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+.topbar-announcement {
+  position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; gap: 4px;
+  margin-top: 16px; padding-top: 8px; padding-bottom: 8px; color: rgba(255,255,255,.95);
+  border: 1px solid rgba(255,255,255,.28); border-radius: 9px;
+  background: rgba(5, 21, 40, .48); box-shadow: 0 6px 18px rgba(0,0,0,.1);
+  backdrop-filter: blur(6px); text-align: center; font-size: 13px; line-height: 1.5;
+}
+.topbar-announcement .announcement-label { font-weight: 700; color: #fff; }
+.topbar-announcement a { color: #fff; font-weight: 700; text-underline-offset: 3px; }
+.topbar-announcement a:hover { color: #dbeafe; }
 .brand { display: flex; align-items: center; gap: 14px; min-width: min(100%, 460px); }
 .brand .logo { height: 52px; width: auto; flex: none; object-fit: contain; background: rgba(255,255,255,.92); border: 1px solid rgba(255,255,255,.92); border-radius: 10px; padding: 6px 12px; box-shadow: 0 8px 24px rgba(0,0,0,.16); }
 .brand-titles { min-width: 0; padding: 10px 14px 11px; border: 1px solid rgba(255,255,255,.22); border-radius: 12px; background: rgba(5, 21, 40, .48); box-shadow: 0 8px 24px rgba(0,0,0,.12); backdrop-filter: blur(6px); }
@@ -423,6 +433,7 @@ body {
   .brand-titles { flex: 1; }
   .profile { justify-content: flex-start; }
   .profile input { flex: 1 1 90px; min-width: 0; }
+  .topbar-announcement { margin-top: 14px; padding: 8px 12px; flex-wrap: wrap; }
 }
 
 /* ========== 转专业计算器页面 ========== */
